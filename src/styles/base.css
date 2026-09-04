@@ -8,6 +8,10 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+html, body {
+  height: 100%;
+}
+
 body {
   font-family: var(--font);
   font-size: var(--fs-md);
@@ -47,17 +51,21 @@ img {
 .app-frame {
   max-width: var(--app-max);
   margin: 0 auto;
-  min-height: 100dvh;
+  height: 100vh; /* fallback for browsers without dvh */
+  height: 100dvh;
   background: var(--bg);
   position: relative;
   box-shadow: 0 0 0 1px rgba(16, 42, 67, 0.06), 0 24px 64px rgba(16, 42, 67, 0.18);
   display: flex;
   flex-direction: column;
+  overflow: hidden; /* the frame is the app shell; .app-scroll is the single scroller */
 }
 
 .app-scroll {
   flex: 1;
+  min-height: 0; /* allow the scroller to shrink below its content height */
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* iOS momentum scrolling */
   overscroll-behavior: contain;
   padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 24px);
 }

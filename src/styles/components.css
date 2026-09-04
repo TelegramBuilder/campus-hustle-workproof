@@ -339,8 +339,7 @@
   max-width: var(--app-max);
   height: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px));
   padding-bottom: env(safe-area-inset-bottom, 0px);
-  background: rgba(255, 255, 255, 0.94);
-  backdrop-filter: blur(12px);
+  background: #ffffff;
   border-top: 1px solid var(--mist);
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -391,8 +390,7 @@
   position: sticky;
   top: 0;
   z-index: 30;
-  background: rgba(248, 250, 252, 0.92);
-  backdrop-filter: blur(10px);
+  background: var(--bg);
   padding: 12px 16px 10px;
   border-bottom: 1px solid transparent;
 }
@@ -426,6 +424,8 @@
   max-width: var(--app-max);
   max-height: 86dvh;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   padding: 10px 18px calc(18px + env(safe-area-inset-bottom, 0px));
   animation: slideUp 0.22s ease;
 }
@@ -481,12 +481,15 @@
 .chat-shell {
   display: flex;
   flex-direction: column;
-  height: calc(100dvh - 58px);
-  max-height: 100dvh;
+  flex: 1;
+  min-height: 0; /* fills the app shell; messages scroll inside */
 }
 .chat-messages {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   padding: 14px 16px;
   display: flex;
   flex-direction: column;
