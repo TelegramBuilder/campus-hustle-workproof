@@ -149,6 +149,8 @@ export interface StudentBusinessProfile {
   userId: string;
   businessName: string;
   category: string; // e.g. Fashion & merch, Food & drinks, Beauty, Events, Design studio, Tech accessories…
+  /** Gradient preset key (g1–g8) used as the business's cover visual. */
+  cover?: string;
   bio?: string;
   services: string[]; // what the business sells / offers
   /** Optional sample link or evidence (menu, catalogue, Instagram) admins check. */
@@ -175,6 +177,8 @@ export interface Campaign {
   confirmedResults: number;
   /** Public code promoters can use to find/join the campaign. */
   campaignCode: string;
+  /** Gradient preset key (g1–g8) for the cover visual; falls back to a per-type preset. */
+  cover?: string;
   brief: string; // min 80 chars
   desiredOutcome?: string;
   deliverables?: string[]; // task campaigns only

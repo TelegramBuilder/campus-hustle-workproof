@@ -49,3 +49,25 @@
   --app-max: 460px;
   --nav-h: 64px;
 }
+
+/* ---------- Dark mode: follows the system setting ---------- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --green-soft: #0f3a2d;
+    --green-mist: #1e4a3c;
+    --gold-soft: #3a2f0d;
+    --bg: #0b1220;
+    --card: #16202f;
+    --ink: #e5edf5;
+    --slate: #94a3b8;
+    --mist: #2a3a4f;
+    --mist-soft: #1d2a3c;
+    --navy: #dbe6f2; /* headings flip light on dark cards */
+    --success-soft: #123524;
+    --warning-soft: #3a2b12;
+    --danger-soft: #3b1d22;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.45), 0 2px 10px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.5), 0 14px 30px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 6px 16px rgba(0, 0, 0, 0.55), 0 24px 60px rgba(0, 0, 0, 0.5);
+  }
+}

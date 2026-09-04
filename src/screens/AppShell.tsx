@@ -1,5 +1,6 @@
 import { Navigate, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useApp, currentUser, totalUnread } from '../lib/store';
+import { Guide } from '../components/Guide';
 import { IconHome, IconTarget, IconPlus, IconChat, IconPassport } from '../components/icons';
 
 export default function AppShell() {
@@ -42,6 +43,7 @@ export default function AppShell() {
           {item({ to: '/app/passport', icon: <IconPassport size={21} />, label: 'Passport' })}
         </nav>
       )}
+      <Guide key={me.id} />
     </div>
   );
 }

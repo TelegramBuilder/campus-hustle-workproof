@@ -1,4 +1,5 @@
-import { useState, type ReactNode, type InputHTMLAttributes, type TextareaHTMLAttributes, type SelectHTMLAttributes } from 'react';
+import { useEffect, useMemo, useState, type ReactNode, type InputHTMLAttributes, type TextareaHTMLAttributes, type SelectHTMLAttributes } from 'react';
+import { onCelebrate, type Celebration } from '../lib/celebrate';
 import { useNavigate } from 'react-router-dom';
 import type { User, Campaign, GrowthProofEntry } from '../lib/types';
 import { publicName, byId } from '../lib/store';
@@ -19,6 +20,71 @@ export const GRADIENTS: Record<string, string> = {
 
 export function gradientFor(key?: string): string {
   return GRADIENTS[key ?? 'g5'] ?? GRADIENTS.g5;
+}
+
+export const COVER_KEYS = ['g1', 'g2', 'g3', 'g4', 'g5', 'g6', 'g7', 'g8'] as const;
+
+/** Default cover preset per campaign type (falls back to the per-campaign cover override). */
+export function coverFor(type: string): string {
+  const map: Record<string, string> = {
+    sale: 'g1', lead: 'g8', ticket_sale: 'g2', content_task: 'g3', promotion_task: 'g4', media_task: 'g5', research_task: 'g6',
+  };
+  return map[type] ?? 'g5';
+}
+
+/** Gradient cover band used on campaign cards, detail heroes and business profiles. */
+export function Cover({ cover, emoji, height = 104, children, className = '' }: { cover?: string; emoji?: string; height?: number; children?: ReactNode; className?: string }) {
+  return (
+    <div className={`cover ${className}`} style={{ background: gradientFor(cover), height }}>
+      <span className="cover-emoji" aria-hidden>{emoji}</span>
+      {children && <div className="cover-children">{children}</div>}
+    </div>
+  );
+}
+
+/* ---------- Celebration moments ---------- */
+
+export function Celebrations() {
+  const [items, setItems] = useState<Celebration[]>([]);
+  useEffect(() => {
+    onCelebrate((c) => {
+      setItems((prev) => [...prev, c]);
+      setTimeout(() => setItems((prev) => prev.filter((x) => x.id !== c.id)), 3600);
+    });
+  }, []);
+  return (
+    <div className="celebrate-wrap" aria-live="polite">
+      {items.map((c) => <CelebrationCard key={c.id} c={c} />)}
+    </div>
+  );
+}
+
+function CelebrationCard({ c }: { c: Celebration }) {
+  const pieces = useMemo(
+    () =>
+      Array.from({ length: 36 }, (_, i) => ({
+        left: Math.random() * 100,
+        delay: Math.random() * 0.4,
+        duration: 1.7 + Math.random() * 1.2,
+        size: 6 + Math.random() * 7,
+        color: ['#087F5B', '#F4B400', '#16A34A', '#FF5A5F', '#1D4ED8', '#DB2777', '#0EA5E9', '#7C3AED'][i % 8],
+      })),
+    [c.id]
+  );
+  return (
+    <div className="celebrate-item">
+      <div className="confetti" aria-hidden>
+        {pieces.map((p, i) => (
+          <span key={i} className="confetti-piece" style={{ left: `${p.left}%`, width: p.size, height: p.size * 0.5, background: p.color, animationDelay: `${p.delay}s`, animationDuration: `${p.duration}s` }} />
+        ))}
+      </div>
+      <div className="celebrate-card">
+        <span className="celebrate-emoji">{c.emoji}</span>
+        <h3>{c.title}</h3>
+        {c.sub && <p>{c.sub}</p>}
+      </div>
+    </div>
+  );
 }
 
 /* ---------- Toast ---------- */
@@ -284,35 +350,32 @@ export function CampaignCard({ campaign, owner, compact = false, showTrack = tru
   const days = Math.ceil((campaign.deadline - Date.now()) / 86400000);
   const people = kind === 'result' ? 'promoter' : 'applicant';
   return (
-    <div className="card card-tap card-pad cc-card" style={{ marginBottom: 12 }} onClick={() => nav(`/app/campaign/${campaign.id}`)}>
-      <div className="row" style={{ gap: 13, alignItems: 'flex-start' }}>
-        <div className="cc-icon" style={{ background: gradientFor(campaign.campaignType) }} aria-hidden>{type?.emoji}</div>
-        <div className="grow" style={{ minWidth: 0 }}>
-          <div className="row-between" style={{ marginBottom: 5, gap: 8 }}>
-            <span className="cc-type-name">{showTrack ? type?.name : ''}</span>
-            <StatusChip status={campaign.status} />
+    <div className="card card-tap cc-card" style={{ marginBottom: 14 }} onClick={() => nav(`/app/campaign/${campaign.id}`)}>
+      <Cover cover={campaign.cover ?? coverFor(campaign.campaignType)} emoji={type?.emoji} height={compact ? 86 : 106}>
+        {showTrack && <span className="cc-type-oncover">{type?.name}</span>}
+        <StatusChip status={campaign.status} />
+      </Cover>
+      <div className="cc-body">
+        <div className="cc-title">{campaign.title}</div>
+        {owner && (
+          <div className="row" style={{ gap: 6, marginTop: 8 }}>
+            <Avatar user={owner} size="xs" showVerified />
+            <span style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--slate)' }}>{publicName(owner)} · verified student business</span>
           </div>
-          <div className="cc-title">{campaign.title}</div>
-          {owner && (
-            <div className="row" style={{ gap: 6, marginTop: 7 }}>
-              <Avatar user={owner} size="xs" showVerified />
-              <span style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--slate)' }}>{publicName(owner)} · verified student business</span>
-            </div>
-          )}
-          {!compact && <p className="subtle cc-brief">{campaign.brief}</p>}
-          {campaign.skills.slice(0, 4).length > 0 && (
-            <div className="row wrap" style={{ gap: 6, marginTop: 10 }}>
-              {campaign.skills.slice(0, 4).map((s) => <span key={s} className="skill-chip">{s}</span>)}
-            </div>
-          )}
-          <div className="divider-soft" style={{ margin: '11px 0 10px' }} />
-          <div className="row wrap" style={{ gap: 6 }}>
-            <span className="cc-meta-chip cc-money">💰 {campaign.rewardType === 'per_result' ? `₦${campaign.rewardAmount.toLocaleString()}/result` : `₦${campaign.rewardAmount.toLocaleString()} flat`}</span>
-            <span className="cc-meta-chip">👥 {campaign.applicantsCount} {people}{campaign.applicantsCount !== 1 ? 's' : ''}</span>
-            <span className="cc-meta-chip">⏳ {days > 0 ? `${days}d left` : days === 0 ? 'Today' : 'Closed'}</span>
-            {kind === 'result' && campaign.targetResults ? <span className="cc-meta-chip">🎯 {campaign.confirmedResults}/{campaign.targetResults}</span> : null}
-            {campaign.squadEligible !== 'individual' && <span className="tag tag-navy">Squad OK</span>}
+        )}
+        {!compact && <p className="subtle cc-brief">{campaign.brief}</p>}
+        {campaign.skills.slice(0, 4).length > 0 && (
+          <div className="row wrap" style={{ gap: 6, marginTop: 12 }}>
+            {campaign.skills.slice(0, 4).map((s) => <span key={s} className="skill-chip">{s}</span>)}
           </div>
+        )}
+        <div className="divider-soft" style={{ margin: '14px 0 12px' }} />
+        <div className="row wrap" style={{ gap: 6 }}>
+          <span className="cc-meta-chip cc-money">💰 {campaign.rewardType === 'per_result' ? `₦${campaign.rewardAmount.toLocaleString()}/result` : `₦${campaign.rewardAmount.toLocaleString()} flat`}</span>
+          <span className="cc-meta-chip">👥 {campaign.applicantsCount} {people}{campaign.applicantsCount !== 1 ? 's' : ''}</span>
+          <span className="cc-meta-chip">⏳ {days > 0 ? `${days}d left` : days === 0 ? 'Today' : 'Closed'}</span>
+          {kind === 'result' && campaign.targetResults ? <span className="cc-meta-chip">🎯 {campaign.confirmedResults}/{campaign.targetResults}</span> : null}
+          {campaign.squadEligible !== 'individual' && <span className="tag tag-navy">Squad OK</span>}
         </div>
       </div>
     </div>

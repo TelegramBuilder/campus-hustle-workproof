@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp, currentUser, publicName, byId, levelInfo, unreadNotifications } from '../lib/store';
-import { CampaignCard, SectionTitle, Avatar, LevelBadge } from '../components/ui';
+import { CampaignCard, SectionTitle, Avatar, LevelBadge, gradientFor, coverFor } from '../components/ui';
 import { IconBell } from '../components/icons';
 import { greeting, timeAgo } from '../lib/format';
+import { replayGuide } from '../components/Guide';
 import { CAMPAIGN_TYPES, CAMPAIGN_TYPE_MAP, KIND_OF } from '../lib/domain';
 import type { CampaignType } from '../lib/types';
 
@@ -20,6 +22,9 @@ export default function Home() {
   const { state } = useApp();
   const nav = useNavigate();
   const me = currentUser();
+  const [hintOff, setHintOff] = useState(() => {
+    try { return localStorage.getItem(`ch_homehint_${me?.id ?? ''}`) === '1'; } catch { return false; }
+  });
   if (!me) return null;
 
   const level = levelInfo(me);
@@ -86,6 +91,23 @@ export default function Home() {
       </div>
 
       <div style={{ padding: '8px 20px 36px' }}>
+        {/* How-it-works hint (dismissible) */}
+        {!hintOff && !isVendor && me.role !== 'ambassador' && (
+          <div className="how-card" style={{ marginBottom: 4 }}>
+            <button className="guide-skip" onClick={() => { setHintOff(true); try { localStorage.setItem(`ch_homehint_${me.id}`, '1'); } catch { /* ignore */ } }} aria-label="Dismiss how-it-works">✕</button>
+            <div className="how-title">✨ How GrowthProof works</div>
+            <div className="col" style={{ gap: 12 }}>
+              <div className="row" style={{ gap: 10 }}><span className="step-num">1</span><div><b>Join a Campaign</b><p>Pick one that fits your skills and tap <em>Join Campaign</em> to get your own referral code.</p></div></div>
+              <div className="row" style={{ gap: 10 }}><span className="step-num">2</span><div><b>Bring a result</b><p>Make a sale, land a lead or finish the task — then submit proof from the Campaign page.</p></div></div>
+              <div className="row" style={{ gap: 10 }}><span className="step-num">3</span><div><b>Vendor confirms → you earn GrowthProof</b><p>Confirmed results become verified Passport entries with your rating. More proof = better chances later.</p></div></div>
+            </div>
+            <div className="row" style={{ gap: 8, marginTop: 14 }}>
+              <button className="btn btn-soft btn-sm grow" onClick={() => { setHintOff(true); try { localStorage.setItem(`ch_homehint_${me.id}`, '1'); } catch { /* ignore */ } }}>Got it</button>
+              <button className="btn btn-ghost btn-sm" onClick={replayGuide}>Replay intro</button>
+            </div>
+          </div>
+        )}
+
         {/* Recommended Campaigns */}
         {featured.length > 0 && (
           <div className="section">
@@ -120,23 +142,25 @@ export default function Home() {
               const biz = byId(state.businesses, m.businessProfileId ?? '');
               const days = Math.ceil((m.deadline - Date.now()) / 86400000);
               return (
-                <div key={m.id} className="card card-pad card-tap" onClick={() => nav(`/app/campaign/${m.id}`)}>
-                  <div className="row-between" style={{ gap: 8 }}>
-                    <span className="tag tag-green">{t?.emoji} {t?.name}</span>
-                    <span className={`tag ${days <= 2 ? 'tag-red' : 'tag-slate'}`}>⏳ {days}d left</span>
-                  </div>
-                  <div className="strong" style={{ marginTop: 9, fontSize: 15.5, color: 'var(--navy)', letterSpacing: '-0.01em' }}>{m.title}</div>
-                  {biz && <div className="subtle" style={{ fontSize: 12, marginTop: 3 }}>🏪 {biz.businessName}</div>}
-                  <div className="divider-soft" />
-                  <div className="row wrap" style={{ gap: 8, fontSize: 12, color: 'var(--slate)' }}>
-                    <span className="row" style={{ gap: 4, fontWeight: 700, color: 'var(--green-dark)' }}>💰 {m.rewardType === 'per_result' ? `₦${m.rewardAmount.toLocaleString()} per result` : `₦${m.rewardAmount.toLocaleString()} fixed`}</span>
-                    <span className="row" style={{ gap: 4, fontWeight: 600 }}>👥 {m.applicantsCount} {KIND_OF(m.campaignType) === 'result' ? 'promoters' : 'applicants'}</span>
-                  </div>
-                  {m.skills.slice(0, 3).length > 0 && (
-                    <div className="row wrap" style={{ gap: 6, marginTop: 9 }}>
-                      {m.skills.slice(0, 3).map((s) => <span key={s} className="skill-chip">{s}</span>)}
+                <div key={m.id} className="card card-pad card-tap" style={{ display: 'flex', gap: 14 }} onClick={() => nav(`/app/campaign/${m.id}`)}>
+                  <div className="op-cover" style={{ background: gradientFor(m.cover ?? coverFor(m.campaignType)) }} aria-hidden>{t?.emoji}</div>
+                  <div className="grow" style={{ minWidth: 0 }}>
+                    <div className="row-between" style={{ gap: 8 }}>
+                      <span className="tag tag-green">{t?.name}</span>
+                      <span className={`tag ${days <= 2 ? 'tag-red' : 'tag-slate'}`}>⏳ {days}d</span>
                     </div>
-                  )}
+                    <div className="strong" style={{ marginTop: 8, fontSize: 15.5, color: 'var(--navy)', letterSpacing: '-0.01em', lineHeight: 1.35 }}>{m.title}</div>
+                    {biz && <div className="subtle" style={{ fontSize: 12, marginTop: 3 }}>🏪 {biz.businessName}</div>}
+                    <div className="row wrap" style={{ gap: 10, marginTop: 8, fontSize: 12, color: 'var(--slate)' }}>
+                      <span className="row" style={{ gap: 4, fontWeight: 700, color: 'var(--green-dark)' }}>💰 {m.rewardType === 'per_result' ? `₦${m.rewardAmount.toLocaleString()}/result` : `₦${m.rewardAmount.toLocaleString()} fixed`}</span>
+                      <span className="row" style={{ gap: 4, fontWeight: 600 }}>👥 {m.applicantsCount} {KIND_OF(m.campaignType) === 'result' ? 'promoters' : 'applicants'}</span>
+                    </div>
+                    {m.skills.slice(0, 3).length > 0 && (
+                      <div className="row wrap" style={{ gap: 6, marginTop: 10 }}>
+                        {m.skills.slice(0, 3).map((s) => <span key={s} className="skill-chip">{s}</span>)}
+                      </div>
+                    )}
+                  </div>
                 </div>
               );
             })}

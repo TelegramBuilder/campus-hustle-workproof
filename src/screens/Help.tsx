@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../lib/store';
 import { toast } from '../components/ui';
+import { resetGuide, replayGuide } from '../components/Guide';
 import { IconBack } from '../components/icons';
 
 const FAQS = [
@@ -34,6 +35,18 @@ const FAQS = [
     a: 'Explorer → Contributor (1 confirmed result or accepted task) → Proven Contributor (3, rating 4.0+) → Trusted Specialist (10, rating 4.5+, strong on-time record) → Squad Leader. Levels are earned only through vendor-confirmed results — you can never buy one.',
   },
 ];
+
+function clearLocalHints() {
+  resetGuide();
+  try {
+    const keys: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith('ch_homehint_')) keys.push(k);
+    }
+    keys.forEach((k) => localStorage.removeItem(k));
+  } catch { /* ignore */ }
+}
 
 export default function Help() {
   const { actions } = useApp();
@@ -81,7 +94,12 @@ export default function Help() {
             <button className="btn btn-primary btn-sm grow" onClick={() => actions.fileReport({ targetType: 'user', targetId: 'u_admin', reason: 'other', details: 'Help request from Help & Safety' })}>
               Get help
             </button>
-            <button className="btn btn-soft btn-sm grow" onClick={() => { actions.resetDemo(); toast('Demo data reset — fresh seed loaded', 'success'); }}>
+            <button className="btn btn-soft btn-sm grow" onClick={replayGuide}>
+              ▶ Replay intro
+            </button>
+          </div>
+          <div style={{ marginTop: 12 }}>
+            <button className="btn btn-ghost btn-sm" onClick={() => { clearLocalHints(); actions.resetDemo(); toast('Demo data reset — fresh seed loaded', 'success'); }}>
               Reset demo data
             </button>
           </div>

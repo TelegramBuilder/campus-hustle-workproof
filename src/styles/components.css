@@ -879,10 +879,29 @@
   overflow: hidden;
   background: linear-gradient(150deg, #102a43 0%, #0b6f51 70%, #087f5b 100%);
   border-radius: 0 0 30px 30px;
-  padding: 18px 16px 26px;
+  padding: 0;
   color: #fff;
   box-shadow: 0 10px 30px rgba(8, 127, 91, 0.22);
 }
+.pp-cover {
+  position: relative;
+  overflow: hidden;
+  padding: 14px 16px 48px;
+  border-radius: 0 0 28px 28px;
+}
+.pp-cover::before {
+  content: '';
+  position: absolute;
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.2), transparent 65%);
+  top: -80px;
+  right: -50px;
+  pointer-events: none;
+}
+.pp-cover > * { position: relative; z-index: 1; }
+.pp-id { padding: 0 18px 28px; margin-top: -34px; }
 .pp-hero::before {
   content: '';
   position: absolute;
@@ -1236,20 +1255,9 @@
 
 /* ---------- Campaign card ---------- */
 
-.cc-card { padding: 22px; }
+.cc-card { padding: 0; overflow: hidden; }
 .cc-card { margin-bottom: 18px; }
-.cc-icon {
-  width: 50px;
-  height: 50px;
-  border-radius: 16px;
-  display: grid;
-  place-items: center;
-  font-size: 23px;
-  flex: none;
-  box-shadow: 0 6px 14px rgba(16, 42, 67, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.25);
-  color: #fff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
-}
+.cc-body { padding: 20px 22px 24px; }
 .cc-title {
   font-weight: 800;
   color: var(--navy);
@@ -1257,12 +1265,13 @@
   line-height: 1.32;
   letter-spacing: -0.015em;
 }
-.cc-type-name {
+.cc-type-oncover {
   font-size: 10.5px;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--slate);
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 .cc-brief {
   font-size: 13.5px;
@@ -1287,6 +1296,224 @@
   color: var(--green-dark);
 }
 
+/* ---------- Cover picker + mini covers ---------- */
+
+.cover-swatch {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border: 3px solid transparent;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 900;
+  font-size: 15px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.12s var(--ease), box-shadow 0.12s var(--ease);
+  cursor: pointer;
+}
+.cover-swatch:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.cover-swatch.selected {
+  border-color: var(--card);
+  box-shadow: 0 0 0 3px var(--green), 0 0 0 5px var(--card);
+}
+
+.op-cover {
+  width: 62px;
+  min-height: 76px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  font-size: 26px;
+  flex: none;
+  align-self: stretch;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 4px 12px rgba(16, 42, 67, 0.14);
+}
+
+.cd-cover { border-radius: var(--r-md); margin-bottom: 16px; }
+
+/* ---------- Cover band ---------- */
+
+.cover {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r-md) var(--r-md) 0 0;
+  display: grid;
+  place-items: center;
+  width: 100%;
+}
+.cover::before {
+  content: '';
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.18), transparent 65%);
+  top: -80px;
+  right: -50px;
+  pointer-events: none;
+}
+.cover::after {
+  content: '';
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1), transparent 65%);
+  bottom: -50px;
+  left: -30px;
+  pointer-events: none;
+}
+.cover-emoji {
+  position: relative;
+  font-size: 42px;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.3));
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+.cover-children {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 11px 13px;
+}
+.cover-children .status { background: rgba(255, 255, 255, 0.94); }
+
+/* ---------- Celebration moments ---------- */
+
+.celebrate-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+}
+.celebrate-item {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+.confetti {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.confetti-piece {
+  position: absolute;
+  top: -20px;
+  border-radius: 2px;
+  animation-name: confettiFall;
+  animation-timing-function: cubic-bezier(0.2, 0.6, 0.4, 1);
+  animation-fill-mode: forwards;
+  opacity: 0;
+}
+@keyframes confettiFall {
+  0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(110vh) rotate(680deg); opacity: 0.85; }
+}
+.celebrate-card {
+  background: var(--card);
+  border-radius: 26px;
+  box-shadow: var(--shadow-lg);
+  padding: 30px 34px;
+  text-align: center;
+  max-width: 330px;
+  animation: celebratePop 0.45s var(--ease) both;
+  border: 1px solid var(--mist);
+}
+.celebrate-card .celebrate-emoji {
+  font-size: 54px;
+  display: block;
+  margin-bottom: 12px;
+  animation: celebrateBounce 0.6s var(--ease) 0.15s both;
+}
+.celebrate-card h3 { font-size: 19px; margin-bottom: 7px; }
+.celebrate-card p { font-size: 13px; color: var(--slate); line-height: 1.55; }
+@keyframes celebratePop {
+  0% { transform: scale(0.55) translateY(18px); opacity: 0; }
+  60% { transform: scale(1.06); opacity: 1; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+@keyframes celebrateBounce {
+  0% { transform: scale(0.4); }
+  55% { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+
+/* ---------- Dark mode refinements ---------- */
+@media (prefers-color-scheme: dark) {
+  body { background: #050a12; }
+  .bottom-nav { background: var(--card); }
+  .toast { background: #102a43; }
+  .admin-side { background: #102a43; }
+  .banner-gold { background: linear-gradient(125deg, #2c2410, #3a2f0d); color: #f0d48a; }
+  .banner-navy { background: linear-gradient(125deg, #1f4e77, #102a43); }
+  .earn-line { color: #f0d48a; }
+  .tag-gold { color: #f0c95a; }
+  .trust-top { color: #f0c95a; }
+  .status-negotiating { color: #f0c95a; }
+  .verify-banner p { color: #f0c95a; }
+  .safety-tip { color: #f0c95a; }
+  .offer-card { color: #f0d48a; }
+  .offer-card .oc-title { color: #f0c95a; }
+  .offer-card .oc-line { color: #f0d48a; }
+  .chat-input { background: var(--mist-soft); }
+  .chat-input:focus { background: var(--card); }
+  .splash-note { color: rgba(255, 255, 255, 0.7); }
+}
+
 /* CampaignDetail result-flow additions */
 .qr-box { width: 64px; height: 64px; border-radius: 12px; background: #fff; border: 1.5px dashed var(--mist); display: grid; place-items: center; font-size: 30px; color: var(--navy); flex: none; }
 .step-num { width: 22px; height: 22px; border-radius: 50%; background: var(--green); color: #fff; font-size: 12px; font-weight: 800; display: grid; place-items: center; flex: none; }
+
+/* ---------- Home how-it-works hint ---------- */
+.how-card {
+  position: relative; background: var(--card); border: 1px solid var(--mist);
+  border-left: 3px solid var(--green); border-radius: var(--r);
+  padding: 16px 18px 14px; box-shadow: var(--sh-sm);
+}
+.how-card .how-title { font-weight: 800; font-size: 14.5px; color: var(--navy); margin-bottom: 12px; letter-spacing: -0.01em; }
+.how-card b { font-size: 13px; color: var(--navy); display: block; margin-bottom: 1px; }
+.how-card p { font-size: 12px; color: var(--slate); line-height: 1.5; margin: 0; }
+.how-card .step-num { background: var(--green); }
+.how-card .guide-skip { position: absolute; top: 10px; right: 12px; font-size: 12px; color: var(--slate); background: none; border: 0; padding: 6px; line-height: 1; }
+@media (prefers-color-scheme: dark) {
+  .how-card b { color: var(--ink); }
+}
+
+/* ---------- First-run guide ---------- */
+.guide-overlay {
+  position: fixed; inset: 0; z-index: 90;
+  background: rgba(10, 22, 35, 0.72);
+  display: grid; place-items: center; padding: 24px;
+  animation: guideFade 0.25s var(--ease) both;
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+}
+.guide-card {
+  background: var(--card); border-radius: 22px; padding: 26px 24px 20px;
+  width: 100%; max-width: 380px; text-align: center; position: relative;
+  box-shadow: 0 30px 70px rgba(5, 15, 30, 0.45);
+  animation: guidePop 0.4s var(--ease) both;
+}
+.guide-card h2 { font-size: 20px; letter-spacing: -0.02em; margin: 4px 0 8px; }
+.guide-card p { font-size: 13.5px; line-height: 1.62; color: var(--slate); margin: 0 auto; max-width: 320px; }
+.guide-emoji {
+  width: 64px; height: 64px; margin: 0 auto 12px; border-radius: 20px;
+  background: linear-gradient(135deg, var(--green-soft), #d3f2e6);
+  display: grid; place-items: center; font-size: 32px;
+  animation: celebrateBounce 0.6s var(--ease) 0.1s both;
+}
+.guide-skip { position: absolute; top: 12px; right: 14px; font-size: 12px; font-weight: 700; color: var(--slate); background: none; border: 0; padding: 6px; }
+.guide-dots { display: flex; justify-content: center; gap: 6px; margin: 14px 0; }
+.guide-dots i { width: 7px; height: 7px; border-radius: 99px; background: var(--mist-strong); transition: all 0.25s; }
+.guide-dots i.on { width: 22px; background: var(--green); }
+@keyframes guideFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes guidePop { from { transform: translateY(14px) scale(0.96); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-color-scheme: dark) {
+  .guide-emoji { background: linear-gradient(135deg, rgba(8, 127, 91, 0.4), rgba(8, 127, 91, 0.12)); }
+  .guide-overlay { background: rgba(2, 6, 12, 0.8); }
+}

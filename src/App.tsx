@@ -1,5 +1,5 @@
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { Toasts } from './components/ui';
+import { Toasts, Celebrations } from './components/ui';
 import Splash from './screens/Splash';
 import Onboarding from './screens/Onboarding';
 import Login from './screens/Login';
@@ -25,6 +25,7 @@ export default function App() {
   return (
     <HashRouter>
       <Toasts />
+      <Celebrations />
       <Routes>
         <Route path="/" element={<Splash />} />
         <Route path="/onboarding" element={<Onboarding />} />

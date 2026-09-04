@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useApp, currentUser, byId, publicName, levelInfo, userRating } from '../lib/store';
-import { Avatar, RatingStars, LevelBadge, GrowthProofCard, EmptyState, toast, Modal, Field, Input, Textarea } from '../components/ui';
+import { Avatar, RatingStars, LevelBadge, GrowthProofCard, EmptyState, toast, Modal, Field, Input, Textarea, gradientFor, COVER_KEYS } from '../components/ui';
 import { IconBack, IconEdit, IconUsers, IconShield, IconVerified } from '../components/icons';
 import { timeAgo } from '../lib/format';
 import { BUSINESS_CATEGORIES } from '../lib/domain';
@@ -19,7 +19,7 @@ export default function Passport() {
   const [tab, setTab] = useState<(typeof TABS)[number]>('Overview');
   const [bizOpen, setBizOpen] = useState(false);
   const [pfOpen, setPfOpen] = useState(false);
-  const [bizForm, setBizForm] = useState({ businessName: '', category: BUSINESS_CATEGORIES[0], services: '', evidenceNote: '' });
+  const [bizForm, setBizForm] = useState({ businessName: '', category: BUSINESS_CATEGORIES[0], services: '', evidenceNote: '', cover: 'g5' });
   const [pfForm, setPfForm] = useState({ title: '', description: '', link: '' });
   const [privId, setPrivId] = useState<string | null>(null);
   const [params] = useSearchParams();
@@ -69,10 +69,11 @@ export default function Passport() {
       category: bizForm.category,
       services,
       evidenceNote: bizForm.evidenceNote.trim() || undefined,
+      cover: bizForm.cover,
     });
     if (err) { toast(err, 'error'); return; }
     setBizOpen(false);
-    setBizForm({ businessName: '', category: BUSINESS_CATEGORIES[0], services: '', evidenceNote: '' });
+    setBizForm({ businessName: '', category: BUSINESS_CATEGORIES[0], services: '', evidenceNote: '', cover: 'g5' });
     toast('Business application sent — admins will review it', 'success');
   };
 
@@ -87,31 +88,34 @@ export default function Passport() {
   const header = (
     <div>
       <div className="pp-hero">
-        <div className="row-between" style={{ marginBottom: 16 }}>
-          {isMe ? <div /> : <button className="btn-icon" style={{ background: 'rgba(255,255,255,0.16)', color: '#fff' }} onClick={() => nav(-1)}><IconBack size={18} /></button>}
-          {isMe && (
-            <div className="row" style={{ gap: 8 }}>
-              {!bizApproved && (
-                <button className="btn btn-sm pp-chip-btn" onClick={() => setBizOpen(true)}>🏪 {biz ? (biz.status === 'pending' ? 'Business pending' : biz.status === 'rejected' ? 'Re-apply as vendor' : '') : 'Start a business'}</button>
-              )}
-              <button className="btn btn-sm" style={{ background: '#fff', color: 'var(--green-dark)', fontWeight: 800 }} onClick={() => nav('/app/profile/edit')}><IconEdit size={14} /> Edit</button>
-            </div>
-          )}
+        <div className="pp-cover" style={{ background: gradientFor(profile.photo) }}>
+          <div className="row-between">
+            {isMe ? <div /> : <button className="btn-icon" style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }} onClick={() => nav(-1)}><IconBack size={18} /></button>}
+            {isMe && (
+              <div className="row" style={{ gap: 8 }}>
+                {!bizApproved && (
+                  <button className="btn btn-sm pp-chip-btn" onClick={() => setBizOpen(true)}>🏪 {biz ? (biz.status === 'pending' ? 'Business pending' : biz.status === 'rejected' ? 'Re-apply as vendor' : '') : 'Start a business'}</button>
+                )}
+                <button className="btn btn-sm" style={{ background: '#fff', color: 'var(--green-dark)', fontWeight: 800 }} onClick={() => nav('/app/profile/edit')}><IconEdit size={14} /> Edit</button>
+              </div>
+            )}
+          </div>
         </div>
-
-        <div className="row" style={{ gap: 15 }}>
-          <span className="pp-avatar"><Avatar user={profile} size="xl" showVerified /></span>
-          <div className="grow" style={{ minWidth: 0 }}>
-            <h1 style={{ fontSize: 22, lineHeight: 1.15, color: '#fff' }}>{publicName(profile)}</h1>
-            <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.78)', fontWeight: 600, marginTop: 2 }}>
-              @{profile.username} · UNILAG{profile.faculty ? ` · ${profile.faculty}` : ''}{profile.showDepartment && profile.department ? ` · ${profile.department}` : ''}
-            </div>
-            <div className="row wrap" style={{ gap: 8, marginTop: 9 }}>
-              {profile.verificationStatus === 'verified' && <span className="pp-verified"><IconVerified size={13} /> Verified UNILAG student</span>}
-              {profile.verificationStatus !== 'verified' && profile.verificationStatus !== 'suspended' && isMe && (
-                <button className="tag tag-amber" style={{ cursor: 'pointer', border: 'none' }} onClick={() => nav('/app/verify')} title="Review or re-submit verification">Verification {profile.verificationStatus} · tap to review</button>
-              )}
-              {profile.verificationStatus === 'suspended' && <span className="tag tag-red">Suspended</span>}
+        <div className="pp-id">
+          <div className="row" style={{ gap: 15 }}>
+            <span className="pp-avatar"><Avatar user={profile} size="xl" showVerified /></span>
+            <div className="grow" style={{ minWidth: 0 }}>
+              <h1 style={{ fontSize: 22, lineHeight: 1.15, color: '#fff' }}>{publicName(profile)}</h1>
+              <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.78)', fontWeight: 600, marginTop: 2 }}>
+                @{profile.username} · UNILAG{profile.faculty ? ` · ${profile.faculty}` : ''}{profile.showDepartment && profile.department ? ` · ${profile.department}` : ''}
+              </div>
+              <div className="row wrap" style={{ gap: 8, marginTop: 9 }}>
+                {profile.verificationStatus === 'verified' && <span className="pp-verified"><IconVerified size={13} /> Verified UNILAG student</span>}
+                {profile.verificationStatus !== 'verified' && profile.verificationStatus !== 'suspended' && isMe && (
+                  <button className="tag tag-amber" style={{ cursor: 'pointer', border: 'none' }} onClick={() => nav('/app/verify')} title="Review or re-submit verification">Verification {profile.verificationStatus} · tap to review</button>
+                )}
+                {profile.verificationStatus === 'suspended' && <span className="tag tag-red">Suspended</span>}
+              </div>
             </div>
           </div>
         </div>
@@ -141,7 +145,7 @@ export default function Passport() {
       )}
 
       {/* level + metrics */}
-      <div className="card card-pad" style={{ marginTop: 14, border: '1.5px solid var(--green-mist)', background: 'linear-gradient(140deg,#ffffff, #f2faf7)' }}>
+      <div className="card card-pad" style={{ marginTop: 14, border: '1.5px solid var(--green-mist)', background: 'var(--card)' }}>
         <div className="row-between">
           <p className="subtle" style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>GrowthProof level</p>
           <LevelBadge levelKey={lvl.key} name={lvl.name} />
@@ -399,6 +403,22 @@ export default function Passport() {
         </Field>
         <Field label="Evidence (optional)" hint="Link or note admins can check — Instagram, catalogue, past orders. Never share bank or card details here.">
           <Textarea placeholder="e.g. Instagram @funmisfashion — 400+ followers, 90+ orders confirmed" value={bizForm.evidenceNote} onChange={(e) => setBizForm({ ...bizForm, evidenceNote: e.target.value })} style={{ minHeight: 52 }} />
+        </Field>
+        <Field label="Business cover" hint="The banner colour students see on your business and Campaigns.">
+          <div className="row wrap" style={{ gap: 10 }}>
+            {COVER_KEYS.map((k) => (
+              <button
+                key={k}
+                type="button"
+                aria-label={`Cover ${k}`}
+                className={`cover-swatch ${bizForm.cover === k ? 'selected' : ''}`}
+                style={{ background: gradientFor(k) }}
+                onClick={() => setBizForm({ ...bizForm, cover: k })}
+              >
+                {bizForm.cover === k && <span>✓</span>}
+              </button>
+            ))}
+          </div>
         </Field>
         <button className="btn btn-primary btn-lg btn-block" onClick={applyVendor}>Submit application</button>
       </Modal>

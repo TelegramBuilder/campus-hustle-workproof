@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp, currentUser, businessOf } from '../lib/store';
-import { Field, Input, Textarea, Select, Chip, toast, Modal } from '../components/ui';
+import { Field, Input, Textarea, Select, Chip, toast, Modal, COVER_KEYS, gradientFor, coverFor } from '../components/ui';
 import { IconBack, IconCheck } from '../components/icons';
 import { CAMPAIGN_TYPES, CAMPAIGN_TYPE_MAP, KIND_OF, SKILLS, EFFORT_LABEL, PAYMENT_LABEL } from '../lib/domain';
 import type { Effort, CampaignType, PaymentArrangement } from '../lib/types';
@@ -34,6 +34,7 @@ export default function CreateCampaign() {
     budget: '',
     zone: ZONES[0],
     squadEligible: 'individual',
+    cover: coverFor('sale'),
   });
   const [deliverables, setDeliverables] = useState(['']);
   const [skills, setSkills] = useState<string[]>([]);
@@ -48,6 +49,7 @@ export default function CreateCampaign() {
     setForm((f) => ({
       ...f,
       campaignType: t,
+      cover: coverFor(t),
       payment: k === 'result' ? 'paid_outside' : f.payment,
       targetResults: k === 'task' ? '' : f.targetResults,
     }));
@@ -127,6 +129,7 @@ export default function CreateCampaign() {
       skills,
       squadEligible: kind === 'task' ? (form.squadEligible as 'individual' | 'both' | 'squad') : 'individual',
       zone: form.zone,
+      cover: form.cover,
     });
     if (err) { setErr(err); toast(err, 'error'); return; }
     setReviewOpen(false);
@@ -163,6 +166,23 @@ export default function CreateCampaign() {
           <p className="subtle" style={{ fontSize: 12, marginBottom: 6 }}>🎨 Creator tasks (creators do the work)</p>
           <div className="row wrap" style={{ gap: 6 }}>
             {TASK_TYPES.map((t) => <Chip key={t.id} active={form.campaignType === t.id} onClick={() => setType(t.id as CampaignType)}>{t.emoji} {t.name}</Chip>)}
+          </div>
+        </Field>
+
+        <Field label="Cover visual" hint="Pick the banner colour for your Campaign card — photos and brand art come later.">
+          <div className="row wrap" style={{ gap: 10 }}>
+            {COVER_KEYS.map((k) => (
+              <button
+                key={k}
+                type="button"
+                aria-label={`Cover ${k}`}
+                className={`cover-swatch ${form.cover === k ? 'selected' : ''}`}
+                style={{ background: gradientFor(k) }}
+                onClick={() => setForm({ ...form, cover: k })}
+              >
+                {form.cover === k && <span>✓</span>}
+              </button>
+            ))}
           </div>
         </Field>
 

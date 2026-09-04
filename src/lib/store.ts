@@ -17,6 +17,7 @@ import type {
 import { buildSeed, hashPassword } from './seed';
 import { containsAbuse, countLinks, moderateContent } from './moderation';
 import { CAMPAIGN_TYPE_MAP, ROLE_FOR_TYPE, roleForCampaign } from './domain';
+import { celebrate } from './celebrate';
 
 /** v3 storage: vendor business profiles + result campaigns. Bump = clean reseed. */
 const KEY = 'wp_campushustle_v3';
@@ -522,7 +523,7 @@ export const actions = {
   },
 
   /* ---------- student business profiles (vendor status) ---------- */
-  applyAsVendor(input: { businessName: string; category: string; services: string[]; bio?: string; evidenceNote?: string }) {
+  applyAsVendor(input: { businessName: string; category: string; services: string[]; bio?: string; evidenceNote?: string; cover?: string }) {
     const u = currentUser();
     if (!u) return 'Please log in.';
     if (u.verificationStatus !== 'verified') return 'Only verified students can start a student business.';
@@ -533,7 +534,7 @@ export const actions = {
     if (state.businesses.some((b) => b.userId === u.id && b.status === 'approved')) return 'You already run an approved student business.';
     if (!rlAllowed(u.id, 'business_apply', 3, 24 * 3600000)) return 'Too many business applications today. Try again tomorrow.';
     add('businesses', {
-      id: uid('biz'), userId: u.id, businessName: input.businessName.trim(), category: input.category.trim(),
+      id: uid('biz'), userId: u.id, businessName: input.businessName.trim(), category: input.category.trim(), cover: input.cover,
       services: input.services.filter((s) => s.trim()).map((s) => s.trim()), bio: input.bio?.trim(), evidenceNote: input.evidenceNote?.trim(),
       status: 'pending', createdAt: Date.now(),
     });
@@ -578,6 +579,7 @@ export const actions = {
     budgetRange?: string;
     skills: string[];
     zone: string;
+    cover?: string;
     squadEligible?: Campaign['squadEligible'];
   }): string | null {
     const u = currentUser();
@@ -626,6 +628,7 @@ export const actions = {
       targetResults: kind === 'result' ? input.targetResults : undefined,
       confirmedResults: 0,
       campaignCode: genCode('CH'),
+      cover: input.cover,
       brief: input.brief.trim(),
       desiredOutcome: input.desiredOutcome?.trim(),
       deliverables: kind === 'task' ? input.deliverables?.filter((d) => d.trim()).map((d) => d.trim()) : undefined,
@@ -868,6 +871,7 @@ export const actions = {
       });
       log(u.id, isAdmin ? 'confirm_result_proof_admin' : 'confirm_result_proof', 'campaign', m.id, proof.description);
       track('result_confirmed', { campaignId: m.id, campaignType: m.campaignType }, m.ownerUserId);
+      if (promoter) celebrate('🎉', 'GrowthProof earned!', `“${m.title}” · ${proof.description} — entry added to your Passport.`);
       // reaching the target closes the Campaign so the vendor can run a new one
       if (m.targetResults && m.confirmedResults >= m.targetResults && m.status === 'open') {
         m.status = 'closed';
@@ -1139,9 +1143,9 @@ export const actions = {
       if (!Number.isFinite(fb.rating) || fb.rating < 1 || fb.rating > 5) return 'Ratings must be between 1 and 5 stars.';
     }
     const rated = new Set(feedbacks.map((f) => f.userId));
-    if (contributorIds.some((c) => !rated.has(c))) return 'Rate every contributing member before accepting.';
-    a.status = 'accepted';
+    if (contributorIds.some((c) => !rated.has(c))) return 'Rate every contributing member before accepting.';      a.status = 'accepted';
     m.status = 'growthproof_issued';
+    celebrate('🏆', 'Campaign accepted', `WorkProof issued to ${feedbacks.length} contributor${feedbacks.length > 1 ? 's' : ''} — check your Passport.`);
     const roleOf = (uid: string): string => {
       if (a.squadId) {
         const sm = state.squadMembers.find((x) => x.squadId === a.squadId && x.userId === uid);

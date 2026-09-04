@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp, currentUser } from '../lib/store';
-import { Field, Input, Textarea, UploadBox, toast, Avatar } from '../components/ui';
+import { Field, Input, Textarea, UploadBox, toast, Avatar, COVER_KEYS, gradientFor } from '../components/ui';
 import { IconBack } from '../components/icons';
 import { SKILLS, FACULTIES, DEPARTMENTS, LEVELS } from '../lib/domain';
 
@@ -16,6 +16,7 @@ export default function EditProfile() {
     department: me?.department ?? '',
     level: me?.level ?? '',
     showDepartment: me?.showDepartment ?? false,
+    photo: me?.photo ?? 'g1',
   }));
   const [skills, setSkills] = useState<string[]>(me?.skills ?? []);
 
@@ -37,6 +38,7 @@ export default function EditProfile() {
       department: form.department,
       level: form.level,
       showDepartment: form.showDepartment,
+      photo: form.photo,
       skills,
     });
     toast('Profile saved', 'success');
@@ -54,10 +56,26 @@ export default function EditProfile() {
         <div className="row" style={{ gap: 14, marginBottom: 18 }}>
           <Avatar user={me} size="xl" showVerified />
           <div className="col" style={{ gap: 4 }}>
-            <span className="strong" style={{ color: 'var(--navy)' }}>Profile photo</span>
-            <span className="subtle" style={{ fontSize: 12.5, maxWidth: 210 }}>Your real first name and photo build trust — your legal name, matric number and ID are never public.</span>
+            <span className="strong" style={{ color: 'var(--navy)' }}>Profile colour</span>
+            <span className="subtle" style={{ fontSize: 12.5, maxWidth: 220 }}>Your real first name builds trust — your legal name, matric number and ID are never public. Pick the colour for your avatar and Passport banner.</span>
           </div>
         </div>
+        <Field label="Avatar & banner colour" hint="Shown on your Passport and next to your name everywhere.">
+          <div className="row wrap" style={{ gap: 10, marginBottom: 6 }}>
+            {COVER_KEYS.map((k) => (
+              <button
+                key={k}
+                type="button"
+                aria-label={`Colour ${k}`}
+                className={`cover-swatch ${form.photo === k ? 'selected' : ''}`}
+                style={{ background: gradientFor(k) }}
+                onClick={() => setForm({ ...form, photo: k })}
+              >
+                {form.photo === k && <span>✓</span>}
+              </button>
+            ))}
+          </div>
+        </Field>
 
         <Field label="Display name" hint="Shown on your Passport instead of your full legal name.">
           <Input value={form.displayName} onChange={(e) => setForm({ ...form, displayName: e.target.value })} placeholder="e.g. Salawu D." />

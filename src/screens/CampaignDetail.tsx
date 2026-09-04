@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useApp, currentUser, byId, publicName, levelInfo, userRating } from '../lib/store';
-import { Avatar, Modal, Field, Textarea, StatusChip, toast, GrowthProofCard } from '../components/ui';
+import { Avatar, Modal, Field, Textarea, StatusChip, toast, GrowthProofCard, Cover, coverFor } from '../components/ui';
 import { IconBack, IconChat, IconFlag, IconShield, IconCheck } from '../components/icons';
 import { timeAgo, dateFull } from '../lib/format';
 import { CAMPAIGN_TYPE_MAP, PAYMENT_LABEL, EFFORT_LABEL, REPORT_REASONS, RESULT_STATUS_LABEL, KIND_OF, RESULT_PROOF_HINT, vendorReliability } from '../lib/domain';
@@ -233,8 +233,12 @@ export default function CampaignDetail() {
       </div>
 
       <div style={{ padding: '4px 16px' }}>
-        <div className="row wrap" style={{ gap: 6 }}>
-          <span className="tag tag-green">{type?.emoji} {type?.name}</span>
+        <Cover cover={campaign.cover ?? coverFor(campaign.campaignType)} emoji={type?.emoji} height={128} className="cd-cover">
+          <span className="cc-type-oncover">{type?.name}</span>
+          <StatusChip status={campaign.status} />
+        </Cover>
+
+        <div className="row wrap" style={{ gap: 6, marginTop: 14 }}>
           {kind === 'result' ? <span className="tag tag-gold">💰 Pays per confirmed result</span> : <span className="tag tag-navy">Creator task</span>}
           <span className="tag tag-slate">📍 {campaign.zone}</span>
         </div>
@@ -259,7 +263,7 @@ export default function CampaignDetail() {
         </div>
 
         {/* Reward card */}
-        <div className="card card-pad" style={{ marginBottom: 14, borderColor: 'var(--gold)', background: 'linear-gradient(140deg,#fffdf4,#fdf6dd)' }}>
+        <div className="card card-pad" style={{ marginBottom: 14, borderColor: 'var(--gold)', background: 'var(--gold-soft)' }}>
           <div className="row-between" style={{ marginBottom: 6 }}>
             <span className="strong" style={{ fontSize: 16, color: 'var(--navy)' }}>{rewardLine}</span>
             <span className="tag" style={{ background: '#f7e5b3', color: '#8a6d00' }}>{kind === 'result' ? 'Per confirmed result' : 'Fixed task'}</span>
