@@ -188,7 +188,7 @@ export default function Passport() {
                 <span style={{ fontSize: 24 }}>🏪</span>
                 <div className="grow">
                   <h3>{biz?.status === 'rejected' ? 'Re-apply as a student vendor' : 'Run a student business?'}</h3>
-                  <p>Verified students can register a business profile for what they sell — clothes, food, prints, design, tickets. Approved vendors post Campaigns that pay promoters and creators. CampusHustle never holds payments.</p>
+                  <p>Register what you sell — clothes, food, design, tickets. Approved vendors post Campaigns that pay promoters and creators. We never hold payments.</p>
                 </div>
                 <button className="btn btn-sm" style={{ background: '#fff', color: 'var(--navy)', fontWeight: 800 }} onClick={() => setBizOpen(true)}>
                   Apply

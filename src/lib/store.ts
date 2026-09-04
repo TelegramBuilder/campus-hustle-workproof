@@ -237,11 +237,11 @@ export function levelInfo(u?: User | null): LevelInfo {
   else if (qualifies.contributor) key = 'contributor';
 
   let next: LevelInfo['next'] = null;
-  if (key === 'explorer') next = { text: 'Complete your first accepted Campaign to become a Contributor.', progress: Math.min(100, entries) };
-  if (key === 'contributor') next = { text: 'Complete 2 more accepted Campaigns (3 total) with a rating of 4.0+ to unlock Proven Contributor.', progress: Math.min(100, Math.round((entries / 3) * 100)) };
-  if (key === 'proven_contributor') next = { text: 'Reach 10 accepted Campaigns, 4.5+ rating and a strong on-time record to become a Trusted Specialist.', progress: Math.min(100, Math.round((entries / 10) * 100)) };
+  if (key === 'explorer') next = { text: 'One accepted Campaign unlocks Contributor.', progress: Math.min(100, entries) };
+  if (key === 'contributor') next = { text: '2 more accepted Campaigns + 4.0★ rating unlock Proven Contributor.', progress: Math.min(100, Math.round((entries / 3) * 100)) };
+  if (key === 'proven_contributor') next = { text: '10 accepted Campaigns, 4.5★ and a strong on-time record unlock Trusted Specialist.', progress: Math.min(100, Math.round((entries / 10) * 100)) };
   if (key === 'squad_leader' || key === 'trusted_specialist') {
-    if (avg < 4.5 || (onTimePct ?? 0) < 90) next = { text: 'Keep your rating at 4.5+ and on-time record above 90% to reach the next level.', progress: Math.min(100, Math.round(avg * 10)) };
+    if (avg < 4.5 || (onTimePct ?? 0) < 90) next = { text: 'Keep 4.5★+ and 90%+ on-time to reach the next level.', progress: Math.min(100, Math.round(avg * 10)) };
   }
 
   const names: Record<string, string> = {

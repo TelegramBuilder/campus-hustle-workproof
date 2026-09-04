@@ -85,7 +85,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div style={{ padding: '0 16px' }}>
+      <div style={{ padding: '8px 20px 36px' }}>
         {/* Recommended Campaigns */}
         {featured.length > 0 && (
           <div className="section">
@@ -148,7 +148,7 @@ export default function Home() {
           <span style={{ fontSize: 28 }}>🏪</span>
           <div className="grow">
             <h3>{isVendor ? 'Have a product or service to sell?' : 'Run a student business?'}</h3>
-            <p>{isVendor ? 'Post a Campaign: promoters bring you sales, leads or tickets — or creators do the work. You confirm every result.' : 'Verified students can start a student business, then post Campaigns that pay promoters and creators.'}</p>
+            <p>{isVendor ? 'Promoters bring sales, leads and tickets — you confirm every result.' : 'Start a business and post Campaigns that pay promoters and creators.'}</p>
           </div>
           <button className="btn btn-sm" style={{ background: '#fff', color: 'var(--green-dark)', fontWeight: 800, boxShadow: 'none', whiteSpace: 'nowrap' }} onClick={() => nav(isVendor ? '/app/create' : '/app/passport?vendor=1')}>
             {isVendor ? 'Create Campaign' : 'Start a business'}
@@ -163,14 +163,14 @@ export default function Home() {
               <Avatar user={byId(state.users, 'u_aisha')} size="sm" showVerified />
               <div className="grow">
                 <span style={{ fontSize: 13 }}><strong>Aisha</strong> earned GrowthProof for <strong>Product photography</strong>.</span>
-                <div className="subtle" style={{ fontSize: 11 }}>{timeAgo(Date.now() - 30 * 86400000)} · Funmi’s Fashion Corner tee shoot</div>
+                <div className="subtle" style={{ fontSize: 11 }}>{timeAgo(Date.now() - 30 * 86400000)} · Tee shoot for Funmi’s Fashion Corner</div>
               </div>
             </div>
             <div className="list-item" style={{ cursor: 'default' }}>
               <Avatar user={byId(state.users, 'u_funmilayo')} size="sm" showVerified />
               <div className="grow">
                 <span style={{ fontSize: 13 }}><strong>Funmi’s Fashion Corner</strong> posted a new Campaign.</span>
-                <div className="subtle" style={{ fontSize: 11 }}>3 days ago · Leads for the grand sale — ₦300 per confirmed lead</div>
+                <div className="subtle" style={{ fontSize: 11 }}>3 days ago · ₦300 per confirmed lead</div>
               </div>
             </div>
             <div className="list-item" style={{ cursor: 'default' }}>
