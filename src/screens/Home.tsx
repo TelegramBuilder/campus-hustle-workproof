@@ -52,7 +52,7 @@ export default function Home() {
         <div className="row-between">
           <div>
             <div className="hero-greeting">{greeting()}, {firstName} 👋</div>
-            <div className="hero-sub">UNILAG · Akoka</div>
+            <div className="hero-sub">{isVendor && myBiz ? `UNILAG · ${myBiz.businessName}` : me.role === 'ambassador' ? 'UNILAG · Campus ambassador' : 'UNILAG · Akoka'}</div>
           </div>
           <button className="hero-bell" onClick={() => nav('/app/notifications')} aria-label="Notifications">
             <IconBell size={19} />
@@ -91,8 +91,31 @@ export default function Home() {
       </div>
 
       <div style={{ padding: '8px 20px 36px' }}>
-        {/* How-it-works hint (dismissible) */}
-        {!hintOff && !isVendor && me.role !== 'ambassador' && (
+        {/* Verification state — a new student must verify before joining anything */}
+        {me.verificationStatus !== 'verified' && (
+          <div className="verify-banner" style={{ margin: '0 0 14px' }}>
+            <span style={{ fontSize: 20 }}>{me.verificationStatus === 'suspended' ? '🚫' : '🪪'}</span>
+            <p>
+              {me.verificationStatus === 'suspended' ? (
+                <><strong>Your account is suspended.</strong> Contact an admin if you think this is a mistake.</>
+              ) : me.verificationStatus === 'pending' ? (
+                <><strong>Verification under review.</strong> You can browse — you’ll be able to join Campaigns as soon as an admin confirms your student ID.</>
+              ) : me.verificationStatus === 'rejected' ? (
+                <><strong>Your verification was declined.</strong> Tap “Review” to see why, then resubmit.</>
+              ) : (
+                <><strong>Verify your student ID first.</strong> Only verified UNILAG students can join Campaigns and earn GrowthProof.</>
+              )}
+            </p>
+            {me.verificationStatus !== 'suspended' && (
+              <button className="btn btn-sm btn-ghost" onClick={() => nav('/app/verify')}>
+                {me.verificationStatus === 'pending' ? 'View status' : 'Verify now'}
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* How-it-works hint (dismissible, verified promoters only) */}
+        {!hintOff && me.verificationStatus === 'verified' && !isVendor && me.role !== 'ambassador' && (
           <div className="how-card" style={{ marginBottom: 4 }}>
             <button className="guide-skip" onClick={() => { setHintOff(true); try { localStorage.setItem(`ch_homehint_${me.id}`, '1'); } catch { /* ignore */ } }} aria-label="Dismiss how-it-works">✕</button>
             <div className="how-title">✨ How GrowthProof works</div>

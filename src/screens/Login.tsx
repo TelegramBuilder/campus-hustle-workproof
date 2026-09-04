@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useApp } from '../lib/store';
+import { useApp, currentUser, landingPath } from '../lib/store';
 import { Field, Input, LogoMark, toast } from '../components/ui';
 import { IconBack, IconShield, IconCrown, IconTarget, IconUser, IconPassport } from '../components/icons';
 
 const DEMO_ACCOUNTS = [
-  { username: 'salawu', label: 'Promoter & creator', desc: 'Salawu — 2 GrowthProof entries, promoter + designer', icon: <IconPassport size={16} />, bg: 'linear-gradient(135deg,#0b8c66,#065f46)' },
-  { username: 'funmilayo', label: 'Student vendor', desc: 'Funmilayo — Funmi’s Fashion Corner', icon: <IconTarget size={16} />, bg: 'linear-gradient(135deg,#1d4ed8,#3730a3)' },
-  { username: 'tobi', label: 'New student', desc: 'Tobi — pending verification', icon: <IconUser size={16} />, bg: 'linear-gradient(135deg,#0284c7,#075985)' },
-  { username: 'chuka', label: 'Campus ambassador', desc: 'Chuka — ambassador dashboard', icon: <IconShield size={16} />, bg: 'linear-gradient(135deg,#7c3aed,#5b21b6)' },
-  { username: 'admin', label: 'Campus admin', desc: 'Kunle — admin dashboard', icon: <IconCrown size={16} />, bg: 'linear-gradient(135deg,#ea580c,#c2410c)' },
+  { username: 'salawu', label: 'Promoter & creator', desc: 'Salawu — joins Campaigns, submits proof, earns GrowthProof', icon: <IconPassport size={16} />, bg: 'linear-gradient(135deg,#0b8c66,#065f46)' },
+  { username: 'funmilayo', label: 'Student vendor', desc: 'Funmilayo — post Campaigns & confirm results', icon: <IconTarget size={16} />, bg: 'linear-gradient(135deg,#1d4ed8,#3730a3)' },
+  { username: 'tobi', label: 'New student', desc: 'Tobi — finishes verification first', icon: <IconUser size={16} />, bg: 'linear-gradient(135deg,#0284c7,#075985)' },
+  { username: 'chuka', label: 'Campus ambassador', desc: 'Chuka — ambassador HQ: recruit, help, earn rewards', icon: <IconShield size={16} />, bg: 'linear-gradient(135deg,#7c3aed,#5b21b6)' },
+  { username: 'admin', label: 'Campus admin', desc: 'Kunle — moderation, verifications & approvals', icon: <IconCrown size={16} />, bg: 'linear-gradient(135deg,#ea580c,#c2410c)' },
 ];
 
 export default function Login() {
@@ -23,7 +23,7 @@ export default function Login() {
     const e = actions.login(identifier ?? id, password ?? pw);
     if (e) { setErr(e); return; }
     toast('Welcome back 👋', 'success');
-    nav('/app/home');
+    nav(landingPath(currentUser()));
   };
 
   return (

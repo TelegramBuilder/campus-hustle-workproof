@@ -106,6 +106,15 @@ export function currentUser(): User | null {
   return id ? byId(state.users, id) ?? null : null;
 }
 
+/** Where a user should land right after login/signup, tuned to their role. */
+export function landingPath(u?: User | null): string {
+  if (!u) return '/app/home';
+  if (u.role === 'admin' || u.role === 'superadmin') return '/admin';
+  if (u.role === 'ambassador') return '/ambassador';
+  if (u.verificationStatus !== 'verified') return '/app/verify';
+  return '/app/home';
+}
+
 /* ---------- authorization helpers ---------- */
 
 /** True when the session actor holds an admin-level role. */

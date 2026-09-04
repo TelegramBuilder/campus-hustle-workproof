@@ -83,6 +83,7 @@ export function Guide() {
   }, []);
 
   if (!me || me.role === 'admin' || me.role === 'superadmin') return null;
+  if (me.verificationStatus !== 'verified') return null; // verify first, intro later
   if (dismissed) return null;
 
   const biz = businessOf(me.id);

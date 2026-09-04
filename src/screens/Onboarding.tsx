@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useApp, currentUser } from '../lib/store';
+import { useApp, currentUser, landingPath } from '../lib/store';
 import { Field, Input, Select, UploadBox, LogoMark, toast } from '../components/ui';
 import { FACULTIES, DEPARTMENTS, LEVELS, SKILLS } from '../lib/domain';
 import { IconCheck } from '../components/icons';
 
 const EXPLAIN = [
-  { emoji: '🎯', title: 'Complete real Campus Campaigns', text: 'Verified clubs, faculties and committees post defined projects. You apply, get selected, and do real work.' },
-  { emoji: '📗', title: 'Build a verified GrowthProof Passport', text: 'Accepted Campaigns become verified, portable entries — with your role, skills, rating and client feedback.' },
-  { emoji: '🚀', title: 'Unlock better opportunities', text: 'Level up from Explorer to Trusted Specialist and let your record — not your claims — open doors before graduation.' },
+  { emoji: '🎯', title: 'Earn real proof on campus', text: 'Student vendors post Campaigns — sales, leads, tickets or creative tasks. Join one that fits your skills, do the work, and the vendor confirms every result.' },
+  { emoji: '📗', title: 'Build a verified GrowthProof Passport', text: 'Vendor-confirmed results become verified entries — with your role, skills, rating and the vendor’s feedback. Proof that travels with you.' },
+  { emoji: '🚀', title: 'Level up & unlock better work', text: 'Grow from Explorer to Trusted Specialist and let your record — not your claims — open the next opportunity.' },
 ];
 
 export default function Onboarding() {
@@ -68,7 +68,7 @@ export default function Onboarding() {
     actions.setSkills(skills);
     actions.completeOnboarding();
     toast('Welcome to GrowthProof 🎉', 'success');
-    nav('/app/home');
+    nav(landingPath(currentUser()));
   };
 
   const toggleSkill = (s: string) => {
@@ -95,7 +95,7 @@ export default function Onboarding() {
           </div>
         </div>
         {me && (
-          <button className="btn btn-sm btn-soft" onClick={() => { actions.completeOnboarding(); nav('/app/home'); }}>
+          <button className="btn btn-sm btn-soft" onClick={() => { actions.completeOnboarding(); nav(landingPath(currentUser())); }}>
             Skip for now
           </button>
         )}
