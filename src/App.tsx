@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toasts } from './components/ui';
 import Splash from './screens/Splash';
 import Onboarding from './screens/Onboarding';
@@ -23,7 +23,7 @@ import AmbassadorDashboard from './screens/AmbassadorDashboard';
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Toasts />
       <Routes>
         <Route path="/" element={<Splash />} />
@@ -51,6 +51,6 @@ export default function App() {
         <Route path="/ambassador" element={<AmbassadorDashboard />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
