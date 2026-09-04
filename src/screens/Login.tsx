@@ -19,8 +19,8 @@ export default function Login() {
   const [pw, setPw] = useState('');
   const [err, setErr] = useState('');
 
-  const submit = (identifier?: string, password?: string) => {
-    const e = actions.login(identifier ?? id, password ?? pw);
+  const submit = async (identifier?: string, password?: string) => {
+    const e = await actions.login(identifier ?? id, password ?? pw);
     if (e) { setErr(e); return; }
     toast('Welcome back 👋', 'success');
     nav(landingPath(currentUser()));
@@ -40,7 +40,7 @@ export default function Login() {
       </div>
 
       <Field label="Username, email or phone">
-        <Input placeholder="salawu or you@student.unilag.edu.ng" value={id} onChange={(e) => setId(e.target.value)} />
+        <Input placeholder="salawu or you@student.unilag.edu.ng" value={id} onChange={(e) => setId(e.target.value)} autoCapitalize="none" autoCorrect="off" />
       </Field>
       <Field label="Password">
         <Input type="password" placeholder="••••••••" value={pw} onChange={(e) => setPw(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && submit()} />

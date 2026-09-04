@@ -30,7 +30,7 @@ export default function Onboarding() {
   const campus = state.campuses.find((c) => c.id === state.onboardingCampusId) ?? state.campuses[0];
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setF((p) => ({ ...p, [k]: e.target.value }));
 
-  const signup = () => {
+  const signup = async () => {
     const errs: Record<string, string> = {};
     if (f.firstName.trim().length < 2) errs.firstName = 'Enter your first name';
     if (f.lastName.trim().length < 2) errs.lastName = 'Enter your last name';
@@ -43,7 +43,7 @@ export default function Onboarding() {
     if (!f.level) errs.level = 'Select your level';
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
-    const err = actions.register({
+    const err = await actions.register({
       firstName: f.firstName, lastName: f.lastName, displayName: f.displayName, username: f.username,
       email: f.email, phone: f.phone, password: f.password, campusId: campus.id,
       faculty: f.faculty, department: f.department, level: f.level,

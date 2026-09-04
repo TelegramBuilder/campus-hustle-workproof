@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { bootstrapCloud } from './lib/store';
 import { Toasts, Celebrations } from './components/ui';
 import Splash from './screens/Splash';
 import Onboarding from './screens/Onboarding';
@@ -22,6 +24,7 @@ import AdminDashboard from './screens/AdminDashboard';
 import AmbassadorDashboard from './screens/AmbassadorDashboard';
 
 export default function App() {
+  useEffect(() => { void bootstrapCloud(); }, []);
   return (
     <HashRouter>
       <Toasts />

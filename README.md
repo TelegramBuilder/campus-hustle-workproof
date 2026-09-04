@@ -35,4 +35,22 @@ npm run build
 | `chuka` | Ambassador |
 | `kunle` | Admin |
 
-Demo data lives in browser localStorage — this is a front-end prototype. Production requires a real backend with server-side auth, authorization, and storage.
+## Local demo vs. cloud sync
+
+Without extra configuration the app runs as a browser-local demo — every device starts from the same seed and **changes don't leave that browser**.
+
+To make accounts real and sync every edit across devices (phone ↔ laptop), enable the **Supabase cloud layer**:
+
+1. Create a free project at [supabase.com](https://supabase.com).
+2. Open **SQL Editor** and run the whole contents of [`schema.sql`](./schema.sql) (creates the shared campus world + the demo auth accounts).
+3. Optional for new sign-ups: **Authentication → Sign In / Providers → Email → Confirm email: OFF** (the demo accounts are pre-confirmed).
+4. Copy `.env.example` to `.env` and paste your **Project URL** and **anon public key** (Project Settings → API).
+5. Rebuild & redeploy — `.env` values are baked into the bundle at build time.
+
+In cloud mode:
+
+- Logging in runs against **Supabase Auth** (demo accounts use their demo email, e.g. `salawu@demo.campushustle.app`, password `password123`).
+- Every signed-in user reads/writes **one shared campus world** (a JSON document in Postgres with row-level security), so a profile edit on the laptop appears live on the phone.
+- Without the keys nothing changes — the local demo still works.
+
+> Production hardening still to come: per-role server-side authorization instead of one shared document, real file upload to Supabase Storage, and server-enforced rate limits.

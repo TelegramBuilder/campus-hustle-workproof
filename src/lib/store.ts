@@ -15,6 +15,7 @@ import type {
   SkillCheck,
 } from './types';
 import { buildSeed, hashPassword } from './seed';
+import { supabase, cloudReady, WORLD_ID, WORLD_CODE, authEmailFor, DEMO_USERNAMES } from './supabase';
 import { containsAbuse, countLinks, moderateContent } from './moderation';
 import { CAMPAIGN_TYPE_MAP, ROLE_FOR_TYPE, roleForCampaign } from './domain';
 import { celebrate } from './celebrate';
@@ -50,12 +51,143 @@ function persist() {
   } catch {
     /* ignore */
   }
+  if (cloudReady && worldId) schedulePush();
 }
 
 function emit() {
   version++;
   listeners.forEach((l) => l());
   persist();
+}
+
+/* ================================================================ */
+/* Optional cloud sync — Supabase shared campus "world"             */
+/* Without env keys the app stays a browser-local demo.             */
+/* ================================================================ */
+
+let worldId: string | null = null;
+let channel: any = null;
+let dirty = false;
+let pushTimer: number | undefined;
+let lastCanon = '';
+let remoteQueued: string | null = null;
+let lastEnteredUid = '';
+let lastEnterAt = 0;
+
+/** Stable serialization (sorted keys) so DB echo reads compare cleanly. */
+function canon(v: any): string {
+  if (v === null || typeof v !== 'object') return JSON.stringify(v);
+  if (Array.isArray(v)) return '[' + v.map(canon).join(',') + ']';
+  const keys = Object.keys(v).sort();
+  return '{' + keys.map((k) => JSON.stringify(k) + ':' + canon(v[k])).join(',') + '}';
+}
+
+function schedulePush() {
+  dirty = true;
+  if (pushTimer !== undefined) window.clearTimeout(pushTimer);
+  pushTimer = window.setTimeout(() => { void pushNow(); }, 700);
+}
+
+async function pushNow(): Promise<void> {
+  pushTimer = undefined;
+  if (!cloudReady || !worldId) { dirty = false; return; }
+  const c = canon(state);
+  if (c === lastCanon) { dirty = false; return; }
+  try {
+    await supabase()!.from('worlds').update({ state: JSON.parse(JSON.stringify(state)) }).eq('id', worldId);
+    lastCanon = c;
+    dirty = false;
+    if (remoteQueued) { const q = remoteQueued; remoteQueued = null; applyRemoteRaw(q); }
+  } catch { /* transient network error — the next local change retries */ }
+}
+
+function applyRemoteRaw(payload: string): void {
+  try {
+    const obj = JSON.parse(payload) as AppState;
+    applyRemote(obj);
+  } catch { /* ignore malformed */ }
+}
+
+function applyRemote(obj: AppState): void {
+  if (!obj || !Array.isArray(obj.users)) return;
+  const c = canon(obj);
+  if (c === lastCanon || c === canon(state)) return; // own echo or already current
+  if (dirty || pushTimer !== undefined) { remoteQueued = c; return; }
+  const meId = state.sessionUserId;
+  const meObj = meId ? byId(state.users, meId) : undefined;
+  state = obj;
+  if (meId && meObj && !byId(state.users, meId)) (state.users as User[]).push(meObj); // never drop the local session
+  state.sessionUserId = meId && byId(state.users, meId) ? meId : null;
+  emit();
+}
+
+async function enterWorld(authUser: any): Promise<void> {
+  if (!cloudReady) return;
+  const sb = supabase()!;
+  if (channel) { try { sb.removeChannel(channel); } catch { /* ignore */ } channel = null; }
+  worldId = null;
+  const now = Date.now();
+  if (authUser?.id === lastEnteredUid && now - lastEnterAt < 20_000) return;
+  lastEnteredUid = authUser?.id ?? '';
+  lastEnterAt = now;
+
+  const email: string | undefined = authUser?.email;
+  let localUid: string | undefined = authUser?.user_metadata?.local_uid;
+  if (!localUid && email) {
+    const em = String(email).toLowerCase();
+    const match = state.users.find((u) => u.email.toLowerCase() === em);
+    if (match) localUid = match.id;
+    else {
+      const prefix = em.split('@')[0];
+      const un = state.users.find((u) => u.username.toLowerCase() === prefix);
+      if (un) localUid = un.id;
+    }
+  }
+
+  // attach membership to the shared UNILAG demo world
+  const { data: mem } = await sb.from('world_members').select('local_uid, world_id').eq('auth_uid', authUser.id).maybeSingle();
+  const member = mem as { local_uid?: string; world_id?: string } | null;
+  if (!member) {
+    const { data: w } = await sb.from('worlds').select('id').eq('id', WORLD_ID).maybeSingle();
+    if (!w) {
+      // first device ever: create the shared world seeded with current local state
+      await sb.from('worlds').insert({ id: WORLD_ID, code: WORLD_CODE, state: JSON.parse(JSON.stringify(state)) });
+    }
+    await (sb.from('world_members') as any).upsert(
+      { auth_uid: authUser.id, world_id: WORLD_ID, local_uid: localUid ?? '' },
+      { onConflict: 'auth_uid' }
+    );
+    worldId = WORLD_ID;
+  } else {
+    worldId = member.world_id ?? WORLD_ID;
+  }
+
+  const { data: row } = await sb.from('worlds').select('state').eq('id', worldId).maybeSingle();
+  const remoteState = (row as any)?.state as AppState | undefined;
+  const seeded = !!remoteState && Array.isArray(remoteState.users) && remoteState.users.length > 0;
+  if (seeded && remoteState) applyRemote(remoteState);
+  else { dirty = false; lastCanon = ''; void pushNow(); } // adopt local state as world truth
+
+  channel = sb
+    .channel('world:' + worldId)
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'worlds', filter: `id=eq.${worldId}` }, (payload: any) => {
+      if (payload?.new?.state) applyRemote(payload.new.state as AppState);
+    })
+    .subscribe();
+}
+
+/** Boot the cloud layer once (from App). No-op in local demo mode. */
+export async function bootstrapCloud(): Promise<void> {
+  if (!cloudReady) return;
+  const sb = supabase()!;
+  try {
+    const { data } = await sb.auth.getSession();
+    if (data.session?.user) await enterWorld(data.session.user);
+  } catch { /* offline — remain local until next load */ }
+  sb.auth.onAuthStateChange((_e, session) => {
+    if (session?.user) void enterWorld(session.user);
+    else void actions.logout();
+  });
 }
 
 function subscribe(cb: () => void) {
@@ -347,9 +479,18 @@ function fileSharingAllowed(c: Conversation): boolean {
 
 /* ================================================================== */
 
+function cloudLoginHint(msg: string): string {
+  const m = msg.toLowerCase();
+  if (m.includes('invalid login') || m.includes('invalid credentials')) {
+    return 'Cloud sign-in failed — make sure this account exists in Supabase Auth (run schema.sql; demo passwords are password123).';
+  }
+  if (m.includes('email not confirmed')) return 'Confirm your email first — or disable email confirmation under Supabase → Authentication.';
+  return 'Sign-in failed: ' + msg;
+}
+
 export const actions = {
   /* ---------- auth & onboarding ---------- */
-  login(identifier: string, password: string): string | null {
+  async login(identifier: string, password: string): Promise<string | null> {
     const id = identifier.trim().toLowerCase();
     // 10 failed attempts per identifier per 15 minutes
     const attemptKey = id || 'unknown';
@@ -363,30 +504,60 @@ export const actions = {
     );
     if (!u || u.passwordHash !== hashPassword(u.username, password)) return 'Wrong username, email or password.';
     if (u.suspended) return 'This account is suspended. Contact campus admin.';
-    state.sessionUserId = u.id;
+
+    if (cloudReady) {
+      // real authentication against Supabase Auth
+      const sb = supabase()!;
+      const demo = DEMO_USERNAMES.has(u.username.toLowerCase());
+      const email = demo || !/@/.test(u.email) ? authEmailFor(u.username) : u.email;
+      state.sessionUserId = u.id; // guard: a remote snapshot must not drop this identity
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) {
+        state.sessionUserId = null;
+        return cloudLoginHint(error.message);
+      }
+      const { data } = await sb.auth.getSession();
+      if (data.session?.user) await enterWorld(data.session.user);
+    } else {
+      state.sessionUserId = u.id;
+    }
     track('login', { method: 'password' }, u.id);
     emit();
     return null;
   },
 
-  logout() {
+  async logout() {
+    if (cloudReady) { try { await supabase()!.auth.signOut(); } catch { /* ignore */ } }
     state.sessionUserId = null;
     emit();
   },
 
-  register(input: {
+  async register(input: {
     firstName: string; lastName: string; displayName?: string; username: string;
     email: string; phone: string; password: string; campusId: string;
     faculty?: string; department?: string; level?: string;
-  }): string | null {
+  }): Promise<string | null> {
     const username = input.username.toLowerCase().trim();
+    const email = input.email.trim().toLowerCase();
     // 3 accounts per device per hour (browser-level only — server must enforce IP/device limits)
     if (!rlAllowed('register', 'accounts', 3, 3600000)) return 'Too many accounts created from this device. Try again later.';
     if (state.users.some((u) => u.username.toLowerCase() === username)) return 'That username is already taken.';
-    if (state.users.some((u) => u.email.toLowerCase() === input.email.toLowerCase())) return 'That email is already registered.';
+    if (state.users.some((u) => u.email.toLowerCase() === email)) return 'That email is already registered.';
     if (state.users.some((u) => u.phone.replace(/\s/g, '') === input.phone.replace(/\s/g, ''))) return 'That phone number is already registered.';
+    const newId = uid('u');
+
+    if (cloudReady) {
+      const sb = supabase()!;
+      const { error } = await sb.auth.signUp({
+        email,
+        password: input.password,
+        options: { data: { local_uid: newId } },
+      });
+      if (error) return 'Account sign-up failed: ' + error.message;
+    }
+
     const u: User = {
-      id: uid('u'),
+      id: newId,
       role: 'student',
       firstName: input.firstName.trim(),
       lastName: input.lastName.trim(),
@@ -413,6 +584,7 @@ export const actions = {
     state.onboardingStep = 'verify';
     track('register', {}, u.id);
     emit();
+    if (cloudReady && worldId) schedulePush(); // make the new member visible to other devices
     return null;
   },
 
