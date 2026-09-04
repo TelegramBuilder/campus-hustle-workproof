@@ -54,3 +54,22 @@ In cloud mode:
 - Without the keys nothing changes — the local demo still works.
 
 > Production hardening still to come: per-role server-side authorization instead of one shared document, real file upload to Supabase Storage, and server-enforced rate limits.
+
+## Auto-deploying database changes (Supabase ↔ GitHub)
+
+The `supabase/` folder is the **source of truth** for the database:
+
+- `supabase/config.toml` — project config (set `project_id` to your project ref)
+- `supabase/migrations/20260904000000_init.sql` — the initial schema (idempotent: it can be re-run on the current DB safely)
+
+Two ways to apply schema going forward:
+
+**A. Automatic (recommended) — GitHub database branches.**
+1. In Supabase Dashboard → **Integrations → GitHub**, make sure this repo is connected and set the **Production Branch** to `main`.
+2. From now on, every schema change is a numbered `.sql` file added to `supabase/migrations/` (e.g. `20260905000000_add_uploads.sql`), committed and merged to `main` — Supabase applies it automatically.
+   - Locally you can generate a new empty migration with `supabase migration new add_uploads` (needs the [Supabase CLI](https://supabase.com/docs/guides/cli)).
+   - Or just create the file by hand with a timestamp prefix.
+
+**B. Manual — SQL editor.** Paste the contents of `schema.sql` (or a migration file) into Supabase → SQL Editor → **Run**. Use this when you don't want to touch Git.
+
+> The old root `schema.sql` is kept as a single-file reference for the SQL Editor; the `supabase/migrations/` folder is what the GitHub integration actually applies.

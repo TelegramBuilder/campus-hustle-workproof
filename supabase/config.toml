@@ -1,0 +1,25 @@
+# Supabase configuration — required by the GitHub database-branches integration.
+# Replace YOUR_PROJECT_REF below: the short id in your project URL
+# (e.g. https://<PROJECT_REF>.supabase.co → ref looks like "abcdef").
+project_id = "YOUR_PROJECT_REF"
+project_name = "campus-hustle-workproof"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+# Set this to your project's Postgres major version (Project Settings → Database).
+# 15 and 17 are the current Supabase defaults.
+major_version = 15
+
+[auth]
+enabled = true
+site_url = "https://telegrambuilder.github.io/campus-hustle-workproof"
+additional_redirect_urls = []
+jwt_expiry = 3600
+enable_signup = true
