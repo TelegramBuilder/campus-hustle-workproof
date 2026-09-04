@@ -14,7 +14,7 @@ const PROMOTER: Slide[] = [
   {
     emoji: '👋',
     title: 'Welcome to GrowthProof',
-    body: 'Student vendors post real campus work — sales, leads, tickets or creative tasks. Do the work, get it confirmed, and build proof before you graduate.',
+    body: 'Two ways to earn on campus: complete fixed-price Skill Gigs (design, photos, content), or join Growth Campaigns that pay per sale, lead or ticket. Every confirmed result builds your Passport.',
   },
   {
     emoji: '🎯',

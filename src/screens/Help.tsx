@@ -73,6 +73,15 @@ export default function Help() {
           </div>
         </div>
 
+        <div className="card card-pad" style={{ borderColor: 'var(--gold)', marginBottom: 16 }}>
+          <h3 style={{ marginBottom: 6 }}>🗺️ Live now vs building</h3>
+          <div className="col" style={{ gap: 8, fontSize: 13, lineHeight: 1.5 }}>
+            <p><strong className="tag tag-green" style={{ marginRight: 6 }}>Live (pilot)</strong> Verified students complete fixed-price Skill Gigs · business owners confirm results · WorkProof Passport entries.</p>
+            <p><strong className="tag tag-gold" style={{ marginRight: 6 }}>Prototype (roadmap)</strong> Growth Campaigns with referral codes · QR codes · sales/lead confirmation · payment-received tracking · Growth Teams.</p>
+            <p className="subtle" style={{ fontSize: 12 }}>Campuses decide which phases to switch on. CampusHustle never holds or processes payments in any phase.</p>
+          </div>
+        </div>
+
         <div className="section">
           <h3 style={{ fontSize: 16, marginBottom: 8 }}>Frequently asked</h3>
           {FAQS.map((f, i) => (

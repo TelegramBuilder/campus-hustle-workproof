@@ -1470,6 +1470,38 @@
 .qr-box { width: 64px; height: 64px; border-radius: 12px; background: #fff; border: 1.5px dashed var(--mist); display: grid; place-items: center; font-size: 30px; color: var(--navy); flex: none; }
 .step-num { width: 22px; height: 22px; border-radius: 50%; background: var(--green); color: #fff; font-size: 12px; font-weight: 800; display: grid; place-items: center; flex: none; }
 
+/* ---------- Earn-mode switch ---------- */
+.earn-switch {
+  display: flex; gap: 6; padding: 5px; border-radius: 999px;
+  background: var(--mist-soft); border: 1px solid var(--mist); margin-bottom: 16px;
+}
+.earn-switch button {
+  flex: 1; border: 0; background: none; padding: 10px 8px; border-radius: 999px;
+  font-weight: 800; font-size: 13px; color: var(--slate); cursor: pointer; transition: all 0.2s var(--ease);
+  white-space: nowrap; text-align: center;
+}
+.earn-switch button.on {
+  background: var(--navy); color: #fff; box-shadow: 0 6px 16px rgba(16, 42, 67, 0.28);
+}
+@media (max-width: 400px) { .earn-switch button { font-size: 12px; padding: 9px 4px; } }
+
+/* ---------- Vendor trust profile ---------- */
+.trust-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+}
+.trust-stat {
+  background: var(--card); border: 1px solid var(--mist); border-radius: 12px;
+  padding: 8px 6px; text-align: center;
+}
+.trust-stat b { display: block; font-size: 15px; color: var(--navy); }
+.trust-stat span { font-size: 10px; color: var(--slate); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+@media (prefers-color-scheme: dark) {
+  .earn-switch { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); }
+  .earn-switch button.on { background: var(--green); }
+  .trust-stat { background: var(--navy-soft, rgba(255,255,255,0.05)); border-color: rgba(255,255,255,0.08); }
+  .trust-stat b { color: var(--ink); }
+}
+
 /* ---------- Home how-it-works hint ---------- */
 .how-card {
   position: relative; background: var(--card); border: 1px solid var(--mist);

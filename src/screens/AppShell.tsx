@@ -1,5 +1,5 @@
 import { Navigate, NavLink, Outlet, useLocation } from 'react-router-dom';
-import { useApp, currentUser, totalUnread } from '../lib/store';
+import { useApp, currentUser, totalUnread, currentEarnMode } from '../lib/store';
 import { Guide } from '../components/Guide';
 import { IconHome, IconTarget, IconPlus, IconChat, IconPassport } from '../components/icons';
 
@@ -7,6 +7,7 @@ export default function AppShell() {
   const { state } = useApp();
   const location = useLocation();
   const me = currentUser();
+  const earnLabel = currentEarnMode() === 'skills' ? 'Missions' : 'Campaigns';
   void state;
 
   if (!me) return <Navigate to="/" replace />;
@@ -34,7 +35,7 @@ export default function AppShell() {
       {!isChat && (
         <nav className="bottom-nav">
           {item({ to: '/app/home', icon: <IconHome size={21} />, label: 'Home' })}
-          {item({ to: '/app/campaigns', icon: <IconTarget size={21} />, label: 'Campaigns' })}
+          {item({ to: '/app/campaigns', icon: <IconTarget size={21} />, label: earnLabel })}
           <NavLink to="/app/create" className="nav-item">
             <span className="nav-post"><IconPlus size={24} /></span>
             <span style={{ marginTop: 2 }}>Create</span>

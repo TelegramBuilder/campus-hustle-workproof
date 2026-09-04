@@ -4,7 +4,7 @@ import { useApp, currentUser, byId, publicName, levelInfo, userRating } from '..
 import { Avatar, RatingStars, LevelBadge, GrowthProofCard, EmptyState, toast, Modal, Field, Input, Textarea, gradientFor, COVER_KEYS } from '../components/ui';
 import { IconBack, IconEdit, IconUsers, IconShield, IconVerified } from '../components/icons';
 import { timeAgo } from '../lib/format';
-import { BUSINESS_CATEGORIES } from '../lib/domain';
+import { BUSINESS_CATEGORIES, KIND_OF } from '../lib/domain';
 import type { User } from '../lib/types';
 
 const TABS = ['Overview', 'GrowthProof', 'Portfolio', 'Skills', 'Reviews', 'Squads'] as const;
@@ -154,8 +154,17 @@ export default function Passport() {
           <Metric n={String(lvl.entries)} l="Accepted" />
           <Metric n={lvl.avgRating > 0 ? `${lvl.avgRating.toFixed(1)}★` : '—'} l="Rating" />
           <Metric n={onTimeRate === null ? '—' : `${onTimeRate}%`} l={onTimeRate === null ? 'No jobs' : 'On-time'} />
+          <Metric n={String(lvl.paymentsReceived)} l="Payment received" />
+          <Metric n={String(lvl.squadCampaigns)} l="Team jobs" />
           <Metric n={String(profile.stats.totalApplications)} l="Applied" />
         </div>
+        {(growthproof.length > 0 || lvl.squadCampaigns > 0) && (
+          <div className="row wrap" style={{ gap: 6, marginTop: 10 }}>
+            <span className="tag tag-green">💼 {growthproof.filter((w) => KIND_OF(w.campaignType) === 'task').length} skill {growthproof.filter((w) => KIND_OF(w.campaignType) === 'task').length === 1 ? 'gig' : 'gigs'}</span>
+            <span className="tag tag-gold">📈 {growthproof.filter((w) => KIND_OF(w.campaignType) === 'result').length} growth {growthproof.filter((w) => KIND_OF(w.campaignType) === 'result').length === 1 ? 'result' : 'results'}</span>
+            <span className="tag tag-navy">🧑‍🤝‍🧑 {lvl.squadCampaigns} team {lvl.squadCampaigns === 1 ? 'job' : 'jobs'}</span>
+          </div>
+        )}
         {lvl.next && !isMe && lvl.entries > 0 && (
           <div className="subtle" style={{ fontSize: 11.5, marginTop: 8 }}>Next: {lvl.next.text}</div>
         )}

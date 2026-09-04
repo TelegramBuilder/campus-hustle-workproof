@@ -173,6 +173,8 @@ export interface Campaign {
   rewardDescription?: string;
   /** Required for result campaigns: number of results the vendor is targeting. */
   targetResults?: number;
+  /** Optional promoter slot cap — new vendors are auto-capped to 10 until they prove 3 completed outcomes. */
+  maxPromoters?: number;
   /** Count of vendor-confirmed results (denormalised for fast display). */
   confirmedResults: number;
   /** Public code promoters can use to find/join the campaign. */
@@ -215,6 +217,8 @@ export interface ResultProofEntry {
   decidedAt?: number;
   note?: string; // rejection / dispute reason from the vendor or admin
   growthproofId?: string; // set when confirmed
+  /** Promoter marks that the vendor paid them (direct, outside the app) after confirmation. */
+  paymentMarkedAt?: number;
 }
 
 export interface CampaignSnapshot {

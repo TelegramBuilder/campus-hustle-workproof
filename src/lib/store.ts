@@ -45,6 +45,17 @@ let state: AppState = load();
 let version = 0;
 const listeners = new Set<() => void>();
 
+/* ---------- earn-mode (top switch: Skills vs Growth Campaigns) ---------- */
+
+export type EarnMode = 'skills' | 'growth';
+const MODE_KEY = 'ch_earn_mode';
+let earnMode: EarnMode = (() => {
+  try { const m = localStorage.getItem(MODE_KEY); return m === 'skills' || m === 'growth' ? m : 'skills'; } catch { return 'skills'; }
+})();
+export function currentEarnMode(): EarnMode {
+  return earnMode;
+}
+
 function persist() {
   try {
     localStorage.setItem(KEY, JSON.stringify(state));
@@ -336,13 +347,18 @@ export interface LevelInfo {
   /** null when the student has no completed Campaigns yet — do NOT render as 100%. */
   onTimePct: number | null;
   squadCampaigns: number;
+  /** Confirmed results where the promoter marked that payment was received (direct, outside the app). */
+  paymentsReceived: number;
   next: { text: string; progress: number } | null;
 }
 
 const LEVELS_ORDER = ['explorer', 'contributor', 'proven_contributor', 'trusted_specialist', 'squad_leader'] as const;
 
 export function levelInfo(u?: User | null): LevelInfo {
-  const empty: LevelInfo = { key: 'explorer', name: 'Explorer', entries: 0, avgRating: 0, onTimePct: null, squadCampaigns: 0, next: null };
+  const empty: LevelInfo = { key: 'explorer', name: 'Explorer', entries: 0, avgRating: 0, onTimePct: null, squadCampaigns: 0, paymentsReceived: 0, next: null };
+  const paymentsReceived = state.campaigns
+    .flatMap((c) => c.resultProofs)
+    .filter((p) => p.promoterId === u?.id && !!p.paymentMarkedAt).length;
   if (!u) return empty;
   const mine = state.growthproof.filter((w) => w.userId === u.id && w.verified);
   const entries = mine.length;
@@ -393,7 +409,45 @@ export function levelInfo(u?: User | null): LevelInfo {
     trusted_specialist: 'Trusted Specialist',
     squad_leader: 'Squad Leader',
   };
-  return { key, name: names[key], entries, avgRating: avg, onTimePct, squadCampaigns, next };
+  return { key, name: names[key], entries, avgRating: avg, onTimePct, squadCampaigns, paymentsReceived, next };
+}
+
+/* ---------- vendor trust profile (anti-scam transparency) ---------- */
+
+export interface VendorTrust {
+  completedCampaigns: number;
+  resultsConfirmed: number;
+  promotersPaid: number;
+  disputeRate: number; // % of decided proofs that went to dispute
+  avgPromoterRating: number;
+  accountAgeDays: number;
+  isNewVendor: boolean;
+  paymentComplaints: number;
+}
+
+export function vendorTrust(businessProfileId: string): VendorTrust {
+  const biz = state.businesses.find((b) => b.id === businessProfileId);
+  const owner = biz ? byId(state.users, biz.userId) : undefined;
+  const mine = state.campaigns.filter((c) => c.businessProfileId === businessProfileId);
+  const proofs = mine.flatMap((c) => c.resultProofs);
+  const decided = proofs.filter((p) => p.status !== 'submitted');
+  const confirmed = proofs.filter((p) => p.status === 'vendor_confirmed').length;
+  const disputed = proofs.filter((p) => p.status === 'disputed').length;
+  const paid = proofs.filter((p) => p.status === 'vendor_confirmed' && !!p.paymentMarkedAt).length;
+  const authored = state.reviews.filter((r) => owner && r.authorId === owner.id);
+  const completed = mine.filter((c) => ['accepted', 'growthproof_issued', 'closed'].includes(c.status)).length;
+  const accountAgeDays = owner?.createdAt ? Math.max(0, Math.round((Date.now() - owner.createdAt) / 86400000)) : 0;
+  const complaints = state.reports.filter((r) => r.targetType === 'user' && r.targetId === owner?.id && r.status !== 'resolved' && r.details?.toLowerCase().includes('payment')).length;
+  return {
+    completedCampaigns: completed,
+    resultsConfirmed: confirmed,
+    promotersPaid: paid,
+    disputeRate: decided.length ? Math.round((disputed / decided.length) * 100) : 0,
+    avgPromoterRating: authored.length ? Math.round((authored.reduce((s, r) => s + r.rating, 0) / authored.length) * 10) / 10 : 0,
+    accountAgeDays,
+    isNewVendor: completed < 3,
+    paymentComplaints: complaints,
+  };
 }
 
 export function skillCheckedTracks(u?: User | null): string[] {
@@ -591,6 +645,12 @@ export const actions = {
   setOnboarding(step: AppState['onboardingStep'], campusId?: string) {
     state.onboardingStep = step;
     if (campusId) state.onboardingCampusId = campusId;
+    emit();
+  },
+
+  setEarnMode(mode: EarnMode) {
+    earnMode = mode;
+    try { localStorage.setItem(MODE_KEY, mode); } catch { /* ignore */ }
     emit();
   },
 
@@ -946,7 +1006,12 @@ export const actions = {
     if (m.ownerUserId === u.id) return 'You own this Campaign — vendors can’t promote their own post.';
     if (campaignKind(m.campaignType) !== 'result') return 'Creator tasks use an application instead — tap Apply and the vendor will review it.';
     if (m.status !== 'open') return 'This Campaign is no longer accepting promoters.';
-    if (!rlAllowed(u.id, 'join_campaign', 25, 24 * 3600000)) return 'Join limit reached for today (25). Try again tomorrow.';
+    if (!rlAllowed(u.id, 'join_campaign', 5, 24 * 3600000)) return 'Anti-spam: you’ve joined 5 Campaigns today. Try again tomorrow.';
+    // new-vendor cap: a business may only run a limited promoter pool until it proves 3 completed outcomes
+    const ownerCompleted = state.campaigns.filter((c) => c.businessProfileId === m.businessProfileId && ['accepted', 'growthproof_issued', 'closed'].includes(c.status)).length;
+    const cap = ownerCompleted < 3 ? (m.maxPromoters ?? 10) : (m.maxPromoters ?? 999);
+    const joined = state.applications.filter((a) => a.campaignId === m.id && a.status === 'joined').length;
+    if (joined >= cap) return `This Campaign is full (${cap} ${cap === 1 ? 'slot' : 'slots'}${ownerCompleted < 3 ? ' — new vendor limit until 3 completed outcomes' : ''}).`;
     const existing = state.applications.find((a) => a.campaignId === m.id && a.applicantId === u.id && !['declined', 'withdrawn'].includes(a.status));
     if (existing) return 'You already joined this Campaign.';
     const code = genCode('REF');
@@ -959,6 +1024,22 @@ export const actions = {
     log(u.id, 'join_campaign', 'campaign', m.id, code);
     const conv = getOrCreateConversation(u.id, m.ownerUserId, m.id);
     conv.fileSharingOpen = true;
+    emit();
+    return null;
+  },
+
+  /** After the vendor confirms, the promoter marks that payment was received (direct, outside the app). */
+  markPaymentReceived(proofId: string): string | null {
+    const u = currentUser();
+    const m = state.campaigns.find((c) => c.resultProofs.some((p) => p.id === proofId));
+    const proof = m?.resultProofs.find((p) => p.id === proofId);
+    if (!u || !m || !proof) return 'Proof not found.';
+    if (proof.promoterId !== u.id) return 'Only the promoter who brought this result can mark payment.';
+    if (proof.status !== 'vendor_confirmed') return 'The vendor must confirm the result first.';
+    if (proof.paymentMarkedAt) return 'Payment already marked as received.';
+    proof.paymentMarkedAt = Date.now();
+    notify(m.ownerUserId, 'campaign', 'Promoter marked payment received 💰', `${publicName(u)} confirmed they received payment for a result on “${m.title}” — your payment reputation just improved.`, `/app/campaign/${m.id}`);
+    log(u.id, 'mark_payment_received', 'campaign', m.id, proofId);
     emit();
     return null;
   },
@@ -1065,7 +1146,14 @@ export const actions = {
       proof.decidedAt = Date.now();
       proof.note = extra.note?.trim() || 'Not confirmed by the vendor.';
       if (promoter) notify(promoter.id, 'result', 'Result proof not confirmed', `On “${m.title}”: ${proof.note}`, `/app/campaign/${m.id}`);
-      log(u.id, isAdmin ? 'reject_result_proof_admin' : 'reject_result_proof', 'campaign', m.id, proof.description);
+      // anti-fraud: repeated fake-result claims auto-pause a promoter pending admin review
+      const rejectCount = state.campaigns.flatMap((c) => c.resultProofs).filter((p) => p.promoterId === proof.promoterId && p.status === 'rejected').length;
+      if (promoter && rejectCount >= 5 && promoter.verificationStatus !== 'suspended') {
+        promoter.verificationStatus = 'suspended';
+        promoter.warnCount = (promoter.warnCount ?? 0) + 1;
+        notifyAdmins('verification', 'Promoter auto-paused', `${publicName(promoter)} reached 5 rejected result claims — suspended pending review.`);
+        log(u.id, 'auto_pause_promoter_fake_results', 'user', promoter.id, `reject #${rejectCount}`);
+      }
     }
     emit();
     return null;
@@ -1085,6 +1173,17 @@ export const actions = {
       id: uid('rep'), reporterId: u.id, targetType: 'campaign', targetId: m.id, reason: 'no_show',
       details: `Result proof dispute: ${proof.description} — ${proof.note}`, status: 'under_review', createdAt: Date.now(), linkedCampaignId: m.id,
     });
+    // anti-fraud: repeated payment complaints about a vendor auto-pause their business profile
+    if (note.toLowerCase().includes('payment') || note.toLowerCase().includes('refund')) {
+      const vendor = byId(state.users, m.ownerUserId);
+      const pComplaints = state.reports.filter((r) => r.targetType === 'user' && r.targetId === m.ownerUserId && r.status !== 'resolved' && r.details?.toLowerCase().includes('payment')).length;
+      if (vendor && pComplaints >= 3 && vendor.verificationStatus !== 'suspended') {
+        vendor.verificationStatus = 'suspended';
+        vendor.warnCount = (vendor.warnCount ?? 0) + 1;
+        notifyAdmins('report', 'Vendor auto-paused', `${publicName(vendor)} received 3+ payment complaints — business profile suspended pending review.`);
+        log(u.id, 'auto_pause_vendor_payment_complaints', 'user', vendor.id, `complaint #${pComplaints}`);
+      }
+    }
     notifyAdmins('report', 'Result proof disputed', `${publicName(u)} disputed a rejection on “${m.title}”.`, '/admin/disputes');
     log(u.id, 'dispute_result_proof', 'campaign', m.id, proofId);
     emit();

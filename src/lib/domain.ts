@@ -28,6 +28,24 @@ export const KIND_OF = (t: CampaignType): CampaignKind => CAMPAIGN_TYPE_MAP[t]?.
 export const RESULT_TYPES: CampaignType[] = ['sale', 'lead', 'ticket_sale'];
 export const TASK_TYPES: CampaignType[] = ['content_task', 'promotion_task', 'media_task', 'research_task'];
 
+/** Skill-Gig tracks shown under “Earn with Skills” (fixed-price, deliverable tasks). */
+export const SKILL_TRACKS: { id: string; name: string; emoji: string; blurb: string; types: CampaignType[] }[] = [
+  { id: 'design_content', name: 'Design & content', emoji: '🎨', blurb: 'Flyers, menus, WhatsApp/Instagram posts, product copy', types: ['content_task'] },
+  { id: 'photo_video', name: 'Photo & video', emoji: '📸', blurb: 'Product photos, short reels, event coverage', types: ['media_task'] },
+  { id: 'promotion_assets', name: 'Campus promotion assets', emoji: '📣', blurb: 'Flyer distribution plans, event/media support, research', types: ['promotion_task', 'research_task'] },
+];
+
+export const SKILL_TRACK_MAP: Record<string, { name: string; emoji: string; types: CampaignType[] }> = Object.fromEntries(SKILL_TRACKS.map((t) => [t.id, t]));
+
+/** Which skill track (or null) a task Campaign belongs to. */
+export function skillTrackFor(t: CampaignType): string | null {
+  const hit = SKILL_TRACKS.find((s) => s.types.includes(t));
+  return hit ? hit.id : null;
+}
+
+export const GIG_LABEL = 'Skill Gig';
+export const CAMPAIGN_LABEL = 'Growth Campaign';
+
 export const CAMPAIGN_TYPE_NAMES = CAMPAIGN_TYPES.map((t) => t.name);
 export const CAMPAIGN_KIND_LABEL: Record<CampaignKind, string> = {
   result: 'Result campaign',

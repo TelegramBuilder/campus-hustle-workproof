@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useApp, currentUser, businessOf } from '../lib/store';
+import { useApp, currentUser, businessOf, currentEarnMode } from '../lib/store';
 import { Field, Input, Textarea, Select, Chip, toast, Modal, COVER_KEYS, gradientFor, coverFor } from '../components/ui';
 import { IconBack, IconCheck } from '../components/icons';
 import { CAMPAIGN_TYPES, CAMPAIGN_TYPE_MAP, KIND_OF, SKILLS, EFFORT_LABEL, PAYMENT_LABEL } from '../lib/domain';
@@ -19,10 +19,11 @@ export default function CreateCampaign() {
   const { actions } = useApp();
   const nav = useNavigate();
   const me = currentUser();
+  const earnMode = currentEarnMode();
   const [reviewOpen, setReviewOpen] = useState(false);
   const [form, setForm] = useState({
     title: '',
-    campaignType: 'sale' as CampaignType,
+    campaignType: (earnMode === 'skills' ? 'content_task' : 'sale') as CampaignType,
     rewardAmount: '',
     rewardDescription: '',
     targetResults: '',
@@ -134,7 +135,7 @@ export default function CreateCampaign() {
     if (err) { setErr(err); toast(err, 'error'); return; }
     setReviewOpen(false);
     setErr('');
-    toast('Campaign submitted for admin review 🎯', 'success');
+    toast(earnMode === 'skills' ? 'Gig submitted for admin review 🎯' : 'Campaign submitted for admin review 🎯', 'success');
     nav('/app/campaigns');
   };
 
@@ -145,7 +146,7 @@ export default function CreateCampaign() {
           <div className="row" style={{ gap: 10 }}>
             <button className="btn-icon btn-soft" onClick={() => nav(-1)}><IconBack size={18} /></button>
             <div>
-              <h1 style={{ fontSize: 19 }}>Create Campaign</h1>
+              <h1 style={{ fontSize: 19 }}>{earnMode === 'skills' ? 'Post a Skill Gig' : 'Create Growth Campaign'}</h1>
               <p className="subtle" style={{ fontSize: 11.5 }}>Posting as {biz.businessName}</p>
             </div>
           </div>
@@ -154,8 +155,8 @@ export default function CreateCampaign() {
       </div>
 
       <div style={{ padding: '6px 16px' }}>
-        <Field label="Campaign title" hint="Clear and specific — promoters need to know exactly what you want.">
-          <Input placeholder="e.g. Leads for the Fashion Corner grand sale" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} maxLength={90} />
+        <Field label={earnMode === 'skills' ? 'Gig title' : 'Campaign title'} hint="Clear and specific — a student should know exactly what you want after one read.">
+          <Input placeholder={earnMode === 'skills' ? 'e.g. Create five Instagram designs for the food-launch' : 'e.g. Leads for the Fashion Corner grand sale'} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} maxLength={90} />
         </Field>
 
         <Field label="Campaign type" hint="Result Campaigns pay per confirmed sale, lead or ticket. Creator tasks pay a fixed reward for delivered work.">

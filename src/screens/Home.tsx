@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useApp, currentUser, publicName, byId, levelInfo, unreadNotifications } from '../lib/store';
+import { useApp, currentUser, publicName, byId, levelInfo, unreadNotifications, currentEarnMode, type EarnMode } from '../lib/store';
 import { CampaignCard, SectionTitle, Avatar, LevelBadge, gradientFor, coverFor } from '../components/ui';
 import { IconBell } from '../components/icons';
 import { greeting, timeAgo } from '../lib/format';
 import { replayGuide } from '../components/Guide';
-import { CAMPAIGN_TYPES, CAMPAIGN_TYPE_MAP, KIND_OF } from '../lib/domain';
+import { CAMPAIGN_TYPES, CAMPAIGN_TYPE_MAP, KIND_OF, SKILL_TRACKS } from '../lib/domain';
 import type { CampaignType } from '../lib/types';
 
 const TYPE_GRADIENT: Record<string, string> = {
@@ -18,14 +18,30 @@ const TYPE_GRADIENT: Record<string, string> = {
   research_task: 'linear-gradient(135deg,#1d4ed8,#3730a3)',
 };
 
+const TRACK_GRADIENT: Record<string, string> = {
+  design_content: 'linear-gradient(135deg,#db2777,#9d174d)',
+  photo_video: 'linear-gradient(135deg,#0d9488,#115e59)',
+  promotion_assets: 'linear-gradient(135deg,#ea580c,#c2410c)',
+};
+
+function EarnSwitch({ mode, onChange }: { mode: EarnMode; onChange: (m: EarnMode) => void }) {
+  return (
+    <div className="earn-switch" role="tablist" aria-label="How do you want to earn?">
+      <button role="tab" aria-selected={mode === 'skills'} className={mode === 'skills' ? 'on' : ''} onClick={() => onChange('skills')}>💼 Earn with Skills</button>
+      <button role="tab" aria-selected={mode === 'growth'} className={mode === 'growth' ? 'on' : ''} onClick={() => onChange('growth')}>📈 Growth Campaigns</button>
+    </div>
+  );
+}
+
 export default function Home() {
-  const { state } = useApp();
+  const { state, actions } = useApp();
   const nav = useNavigate();
   const me = currentUser();
   const [hintOff, setHintOff] = useState(() => {
     try { return localStorage.getItem(`ch_homehint_${me?.id ?? ''}`) === '1'; } catch { return false; }
   });
   if (!me) return null;
+  const mode = currentEarnMode();
 
   const level = levelInfo(me);
   const unreadN = unreadNotifications(me.id);
@@ -33,9 +49,10 @@ export default function Home() {
   const isVendor = !!myBiz && myBiz.status === 'approved';
   const pendingBiz = !!myBiz && myBiz.status === 'pending';
 
-  const open = state.campaigns.filter((m) => ['open', 'shortlisting'].includes(m.status) && m.deadline > Date.now());
+  const kindFilter = (mode === 'skills' ? 'task' : 'result') as 'task' | 'result';
+  const open = state.campaigns.filter((m) => ['open', 'shortlisting'].includes(m.status) && m.deadline > Date.now() && KIND_OF(m.campaignType) === kindFilter);
   const recommended = open
-    .filter((m) => m.skills.some((s) => me.skills.includes(s)) || (KIND_OF(m.campaignType) === 'result' && me.skills.includes('Sales & referrals')))
+    .filter((m) => m.skills.some((s) => me.skills.includes(s)) || (kindFilter === 'result' && me.skills.includes('Sales & referrals')))
     .sort((a, b) => b.createdAt - a.createdAt)
     .slice(0, 3);
   const featured = open.length > 0 ? (recommended.length > 0 ? recommended : open.slice(0, 3)) : [];
@@ -91,6 +108,9 @@ export default function Home() {
       </div>
 
       <div style={{ padding: '8px 20px 36px' }}>
+        {/* Earning-path switch */}
+        <EarnSwitch mode={mode} onChange={(m) => actions.setEarnMode(m)} />
+
         {/* Verification state — a new student must verify before joining anything */}
         {me.verificationStatus !== 'verified' && (
           <div className="verify-banner" style={{ margin: '0 0 14px' }}>
@@ -131,34 +151,45 @@ export default function Home() {
           </div>
         )}
 
-        {/* Recommended Campaigns */}
+        {/* Recommended */}
         {featured.length > 0 && (
           <div className="section">
-            <SectionTitle title="Recommended for you" seeAll="See all" onClick={() => nav('/app/campaigns')} />
+            <SectionTitle title={mode === 'skills' ? 'Gigs matched to your skills' : 'Campaigns matched to your skills'} seeAll="See all" onClick={() => nav('/app/campaigns')} />
             {featured.map((m) => <CampaignCard key={m.id} campaign={m} owner={byId(state.users, m.ownerUserId)} />)}
           </div>
         )}
 
-        {/* Campaign types */}
+        {/* Tracks / types */}
         <div className="section">
-          <SectionTitle title="Campaign types" seeAll="Browse all" onClick={() => nav('/app/campaigns')} />
+          <SectionTitle title={mode === 'skills' ? 'Skill tracks' : 'Campaign types'} seeAll="Browse all" onClick={() => nav('/app/campaigns')} />
           <div className="row wrap" style={{ gap: 10 }}>
-            {CAMPAIGN_TYPES.slice(1).map((t) => {
-              const count = typeCounts.get(t.id as CampaignType) ?? 0;
-              return (
-                <div key={t.id} className="cat-tile" style={{ flex: '1 1 29%', minWidth: 96 }} onClick={() => nav(`/app/campaigns?type=${t.id}`)}>
-                  <div className="cat-emoji" style={{ background: TYPE_GRADIENT[t.id] ?? 'var(--mist-soft)' }}>{t.emoji}</div>
-                  <div className="cat-name">{t.name}</div>
-                  <div className="cat-count"><b>{count}</b> live</div>
-                </div>
-              );
-            })}
+            {mode === 'skills'
+              ? SKILL_TRACKS.map((t) => {
+                  const count = open.filter((m) => t.types.includes(m.campaignType)).length;
+                  return (
+                    <div key={t.id} className="cat-tile" style={{ flex: '1 1 29%', minWidth: 96 }} onClick={() => nav(`/app/campaigns?type=${t.types[0]}`)}>
+                      <div className="cat-emoji" style={{ background: TRACK_GRADIENT[t.id] ?? 'var(--mist-soft)' }}>{t.emoji}</div>
+                      <div className="cat-name">{t.name}</div>
+                      <div className="cat-count"><b>{count}</b> {count === 1 ? 'gig' : 'gigs'}</div>
+                    </div>
+                  );
+                })
+              : CAMPAIGN_TYPES.filter((t) => t.kind === 'result').map((t) => {
+                  const count = typeCounts.get(t.id as CampaignType) ?? 0;
+                  return (
+                    <div key={t.id} className="cat-tile" style={{ flex: '1 1 29%', minWidth: 96 }} onClick={() => nav(`/app/campaigns?type=${t.id}`)}>
+                      <div className="cat-emoji" style={{ background: TYPE_GRADIENT[t.id] ?? 'var(--mist-soft)' }}>{t.emoji}</div>
+                      <div className="cat-name">{t.name}</div>
+                      <div className="cat-count"><b>{count}</b> live</div>
+                    </div>
+                  );
+                })}
           </div>
         </div>
 
         {/* Current opportunities */}
         <div className="section">
-          <SectionTitle title="Current opportunities" seeAll="All Campaigns" onClick={() => nav('/app/campaigns')} />
+          <SectionTitle title={mode === 'skills' ? 'Current opportunities' : 'Current opportunities'} seeAll={mode === 'skills' ? 'All Missions' : 'All Campaigns'} onClick={() => nav('/app/campaigns')} />
           <div className="col" style={{ gap: 12 }}>
             {open.slice(0, 3).map((m) => {
               const t = CAMPAIGN_TYPE_MAP[m.campaignType];

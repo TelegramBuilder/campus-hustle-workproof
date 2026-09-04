@@ -1,14 +1,15 @@
 import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useApp, currentUser, byId } from '../lib/store';
+import { useApp, currentUser, byId, currentEarnMode, type EarnMode } from '../lib/store';
 import { CampaignCard, Modal, Chip, EmptyState } from '../components/ui';
 import { IconSearch, IconFilter } from '../components/icons';
-import { CAMPAIGN_TYPES } from '../lib/domain';
+import { CAMPAIGN_TYPES, SKILL_TRACKS, SKILL_TRACK_MAP, KIND_OF, RESULT_TYPES, TASK_TYPES } from '../lib/domain';
 import type { CampaignType } from '../lib/types';
 
 export default function Campaigns() {
   const { state } = useApp();
   const me = currentUser();
+  const mode: EarnMode = currentEarnMode();
   const [params] = useSearchParams();
   const [q, setQ] = useState('');
   const [type, setType] = useState<string>(params.get('type') ?? 'all');
@@ -18,16 +19,26 @@ export default function Campaigns() {
   const [sort, setSort] = useState<string>('closing');
   const [filtersOpen, setFiltersOpen] = useState(false);
 
+  const kindFilter: 'task' | 'result' = mode === 'skills' ? 'task' : 'result';
   const open = useMemo(
-    // live only: exclude Campaigns whose deadline has already passed
-    () => state.campaigns.filter((m) => ['open', 'shortlisting'].includes(m.status) && m.deadline > Date.now()),
-    [state.campaigns]
+    // live only + the earning path selected by the top switch
+    () => state.campaigns.filter((m) => ['open', 'shortlisting'].includes(m.status) && m.deadline > Date.now() && KIND_OF(m.campaignType) === kindFilter),
+    [state.campaigns, kindFilter]
   );
+
+  const activeTypes = useMemo(() => {
+    if (type === 'all') return kindFilter === 'task' ? TASK_TYPES : RESULT_TYPES;
+    if (kindFilter === 'task') {
+      const tr = SKILL_TRACK_MAP[type];
+      return tr ? tr.types : [type as CampaignType];
+    }
+    return [type as CampaignType];
+  }, [type, kindFilter]);
 
   const results = useMemo(() => {
     const term = q.trim().toLowerCase();
     let list = open.filter((m) => {
-      if (type !== 'all' && m.campaignType !== type) return false;
+      if (!activeTypes.includes(m.campaignType)) return false;
       if (effort !== 'all' && m.effort !== effort) return false;
       if (deadline === '3d' && m.deadline > Date.now() + 3 * 86400000) return false;
       if (deadline === '7d' && m.deadline > Date.now() + 7 * 86400000) return false;
@@ -49,7 +60,7 @@ export default function Campaigns() {
       });
     }
     return list;
-  }, [open, q, type, effort, deadline, elig, sort, me]);
+  }, [open, q, activeTypes, effort, deadline, elig, sort, me]);
 
   const hasFilters = type !== 'all' || effort !== 'all' || deadline !== 'any' || elig !== 'all';
 
@@ -59,7 +70,7 @@ export default function Campaigns() {
         <div className="row" style={{ gap: 10 }}>
           <div className="search-bar grow">
             <span className="search-icon"><IconSearch size={17} /></span>
-            <input placeholder="Search Campaigns, skills, businesses…" value={q} onChange={(e) => setQ(e.target.value)} />
+            <input placeholder={mode === 'skills' ? 'Search gigs, skills, businesses…' : 'Search Campaigns, skills, businesses…'} value={q} onChange={(e) => setQ(e.target.value)} />
           </div>
           <button className={`btn-icon ${hasFilters ? 'btn-primary' : 'btn-soft'}`} style={{ borderRadius: 999 }} onClick={() => setFiltersOpen(true)} aria-label="Filters">
             <IconFilter size={18} />
@@ -73,31 +84,40 @@ export default function Campaigns() {
       </div>
 
       <div className="row wrap" style={{ gap: 6, padding: '4px 16px 10px' }}>
-        {CAMPAIGN_TYPES.map((t) => (
-          <Chip key={t.id} active={type === t.id} onClick={() => setType(type === t.id ? 'all' : t.id)}>
-            {t.emoji} {t.id === 'all' ? 'All' : t.name}
-          </Chip>
-        ))}
+        {mode === 'skills'
+          ? [{ id: 'all', name: 'All gigs', emoji: '🧭' }, ...SKILL_TRACKS].map((t) => (
+              <Chip key={t.id} active={type === t.id} onClick={() => setType(type === t.id ? 'all' : t.id)}>
+                {t.emoji} {t.name}
+              </Chip>
+            ))
+          : CAMPAIGN_TYPES.filter((t) => t.kind === 'result').map((t) => (
+              <Chip key={t.id} active={type === t.id} onClick={() => setType(type === t.id ? 'all' : t.id)}>
+                {t.emoji} {t.name}
+              </Chip>
+            ))}
       </div>
 
       <div style={{ padding: '2px 16px' }}>
         {results.length === 0 ? (
-          <EmptyState emoji="🎯" title="No Campaigns match" sub="Try clearing filters or checking back soon — new Campaigns drop every week." />
+          <EmptyState emoji="🎯" title={mode === 'skills' ? 'No gigs match' : 'No Campaigns match'} sub={mode === 'skills' ? 'Try clearing filters — new gigs drop every week.' : 'Try clearing filters or checking back soon — new Campaigns drop every week.'} />
         ) : (
           <div>
-            <p className="subtle" style={{ marginBottom: 10, fontSize: 12.5 }}>{results.length} open Campaign{results.length !== 1 ? 's' : ''} on UNILAG</p>
+            <p className="subtle" style={{ marginBottom: 10, fontSize: 12.5 }}>{results.length} open {mode === 'skills' ? 'gig' : 'Campaign'}{results.length !== 1 ? 's' : ''} on UNILAG</p>
             {results.map((m) => <CampaignCard key={m.id} campaign={m} owner={byId(state.users, m.ownerUserId)} />)}
           </div>
         )}
       </div>
 
-      <Modal open={filtersOpen} onClose={() => setFiltersOpen(false)} title="Filter Campaigns">
+      <Modal open={filtersOpen} onClose={() => setFiltersOpen(false)} title={mode === 'skills' ? 'Filter gigs' : 'Filter Campaigns'}>
         <div className="filter-row">
-          <label>Campaign type</label>
+          <label>{mode === 'skills' ? 'Skill track' : 'Campaign type'}</label>
           <div className="chips">
-            {CAMPAIGN_TYPES.map((t) => <Chip key={t.id} active={type === t.id} onClick={() => setType(type === t.id ? 'all' : t.id)}>{t.emoji} {t.id === 'all' ? 'All' : t.name}</Chip>)}
+            {mode === 'skills'
+              ? [{ id: 'all', name: 'All gigs', emoji: '🧭' }, ...SKILL_TRACKS].map((t) => <Chip key={t.id} active={type === t.id} onClick={() => setType(type === t.id ? 'all' : t.id)}>{t.emoji} {t.name}</Chip>)
+              : CAMPAIGN_TYPES.filter((t) => t.kind === 'result').map((t) => <Chip key={t.id} active={type === t.id} onClick={() => setType(type === t.id ? 'all' : t.id)}>{t.emoji} {t.name}</Chip>)}
           </div>
         </div>
+        {mode === 'skills' && (
         <div className="filter-row">
           <label>Effort (creator tasks)</label>
           <div className="chips">
@@ -107,6 +127,7 @@ export default function Campaigns() {
             <Chip active={effort === 'large'} onClick={() => setEffort(effort === 'large' ? 'all' : 'large')}>Large · 8+h</Chip>
           </div>
         </div>
+        )}
         <div className="filter-row">
           <label>Deadline</label>
           <div className="chips">
@@ -115,6 +136,7 @@ export default function Campaigns() {
             <Chip active={deadline === '7d'} onClick={() => setDeadline(deadline === '7d' ? 'any' : '7d')}>Next 7 days</Chip>
           </div>
         </div>
+        {mode === 'skills' && (
         <div className="filter-row">
           <label>Eligibility</label>
           <div className="chips">
@@ -123,8 +145,9 @@ export default function Campaigns() {
             <Chip active={elig === 'squad'} onClick={() => setElig(elig === 'squad' ? 'all' : 'squad')}>Squad eligible</Chip>
           </div>
         </div>
+        )}
         <button className="btn btn-primary btn-lg btn-block" onClick={() => setFiltersOpen(false)}>
-          Show {results.length} Campaign{results.length !== 1 ? 's' : ''}
+          Show {results.length} {mode === 'skills' ? 'gig' : 'Campaign'}{results.length !== 1 ? 's' : ''}
         </button>
       </Modal>
     </div>

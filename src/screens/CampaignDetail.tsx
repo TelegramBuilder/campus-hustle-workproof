@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useApp, currentUser, byId, publicName, levelInfo, userRating } from '../lib/store';
+import { useApp, currentUser, byId, publicName, levelInfo, userRating, vendorTrust } from '../lib/store';
 import { Avatar, Modal, Field, Textarea, StatusChip, toast, GrowthProofCard, Cover, coverFor } from '../components/ui';
 import { IconBack, IconChat, IconFlag, IconShield, IconCheck } from '../components/icons';
 import { timeAgo, dateFull } from '../lib/format';
-import { CAMPAIGN_TYPE_MAP, PAYMENT_LABEL, EFFORT_LABEL, REPORT_REASONS, RESULT_STATUS_LABEL, KIND_OF, RESULT_PROOF_HINT, vendorReliability } from '../lib/domain';
+import { CAMPAIGN_TYPE_MAP, PAYMENT_LABEL, EFFORT_LABEL, REPORT_REASONS, RESULT_STATUS_LABEL, KIND_OF, RESULT_PROOF_HINT, vendorReliability, GIG_LABEL, CAMPAIGN_LABEL } from '../lib/domain';
 import type { GrowthProofEntry, ResultProofEntry } from '../lib/types';
 
 const RESULT_STATUS_CLS: Record<ResultProofEntry['status'], string> = {
@@ -147,6 +147,7 @@ export default function CampaignDetail() {
   // vendor reliability across all their result campaigns
   const allOwnerProofs = state.campaigns.filter((c) => c.ownerUserId === campaign.ownerUserId).flatMap((c) => c.resultProofs);
   const rel = vendorReliability(allOwnerProofs.filter((p) => p.status === 'vendor_confirmed').length, allOwnerProofs.filter((p) => p.status === 'disputed').length, allOwnerProofs.filter((p) => p.status === 'rejected').length);
+  const trust = biz ? vendorTrust(biz.id) : null;
   const rewardLine = campaign.rewardType === 'per_result'
     ? `₦${campaign.rewardAmount.toLocaleString()} per confirmed result`
     : `₦${campaign.rewardAmount.toLocaleString()} fixed reward`;
@@ -228,7 +229,7 @@ export default function CampaignDetail() {
     <div style={{ paddingBottom: 40 }}>
       <div className="screen-header">
         <button className="btn-icon btn-soft" onClick={() => nav(-1)}><IconBack size={18} /></button>
-        <h1 style={{ fontSize: 17 }}>Campaign</h1>
+        <h1 style={{ fontSize: 17 }}>{kind === 'task' ? GIG_LABEL : CAMPAIGN_LABEL}</h1>
         <StatusChip status={campaign.status} />
       </div>
 
@@ -239,7 +240,7 @@ export default function CampaignDetail() {
         </Cover>
 
         <div className="row wrap" style={{ gap: 6, marginTop: 14 }}>
-          {kind === 'result' ? <span className="tag tag-gold">💰 Pays per confirmed result</span> : <span className="tag tag-navy">Creator task</span>}
+          {kind === 'result' ? <span className="tag tag-gold">💰 Pays per confirmed result</span> : <span className="tag tag-green">💼 Skill Gig · fixed price</span>}
           <span className="tag tag-slate">📍 {campaign.zone}</span>
         </div>
 
@@ -286,11 +287,31 @@ export default function CampaignDetail() {
           </p>
         </div>
 
-        {/* Vendor reliability */}
-        <div className="row" style={{ gap: 6, marginBottom: 14, fontSize: 12, color: rel.tone === 'good' ? 'var(--green)' : rel.tone === 'bad' ? 'var(--danger)' : 'var(--amber)' }}>
+        {/* Vendor reliability + trust profile */}
+        <div className="row" style={{ gap: 6, marginBottom: 10, fontSize: 12, color: rel.tone === 'good' ? 'var(--green)' : rel.tone === 'bad' ? 'var(--danger)' : 'var(--amber)' }}>
           <span>{rel.tone === 'good' ? '🛡️' : rel.tone === 'bad' ? '⚠️' : '🔎'}</span>
           <span><strong>Vendor reliability:</strong> {rel.label}</span>
         </div>
+
+        {trust && (
+          <div className="card card-pad" style={{ marginBottom: 14, background: 'var(--mist-soft)' }}>
+            <div className="row-between" style={{ marginBottom: 8 }}>
+              <span className="strong" style={{ fontSize: 13.5, color: 'var(--navy)' }}>🛡️ Vendor trust profile</span>
+              {trust.isNewVendor
+                ? <span className="tag tag-amber">New vendor — limited slots</span>
+                : <span className="tag tag-green">Proven vendor</span>}
+            </div>
+            <div className="trust-grid">
+              <div className="trust-stat"><b>{trust.completedCampaigns}</b><span>Completed</span></div>
+              <div className="trust-stat"><b>{trust.resultsConfirmed}</b><span>Results confirmed</span></div>
+              <div className="trust-stat"><b>{trust.promotersPaid}</b><span>Promoters paid</span></div>
+              <div className="trust-stat"><b>{trust.disputeRate}%</b><span>Dispute rate</span></div>
+              <div className="trust-stat"><b>{trust.avgPromoterRating > 0 ? trust.avgPromoterRating.toFixed(1) : '—'}</b><span>Avg promoter rating</span></div>
+              <div className="trust-stat"><b>{trust.accountAgeDays}d</b><span>Account age</span></div>
+            </div>
+            {trust.isNewVendor && <p className="subtle" style={{ fontSize: 11.5, marginTop: 8 }}>Anti-scam rule: new vendors are capped at 10 promoters until 3 completed outcomes prove them.</p>}
+          </div>
+        )}
 
         {/* The brief */}
         <div className="section">
@@ -351,8 +372,14 @@ export default function CampaignDetail() {
                   <div className="row wrap" style={{ gap: 6, fontSize: 12, color: 'var(--slate)', marginTop: 4 }}>
                     {p.customerRef && <span className="attach-pill">🔎 {p.customerRef}</span>}
                     {p.amount ? <span className="attach-pill">Value ₦{p.amount.toLocaleString()}</span> : null}
+                    {p.paymentMarkedAt && <span className="tag tag-green">💰 Payment received ✓</span>}
                   </div>
                   {p.note && <p className="subtle" style={{ fontSize: 12, marginTop: 6, fontStyle: 'italic' }}>“{p.note}”</p>}
+                  {p.status === 'vendor_confirmed' && !p.paymentMarkedAt && (
+                    <button className="btn btn-sm btn-outline" style={{ marginTop: 8 }} onClick={() => { const e = actions.markPaymentReceived(p.id); if (e) toast(e, 'error'); else toast('Payment marked — thanks for keeping your vendor honest 💪', 'success'); }}>
+                      Mark payment received
+                    </button>
+                  )}
                   {p.status === 'rejected' && (
                     <button className="btn btn-sm btn-outline" style={{ marginTop: 8 }} onClick={() => { setDisputeFor(p); setDisputeNote(''); }}>
                       Dispute this decision
