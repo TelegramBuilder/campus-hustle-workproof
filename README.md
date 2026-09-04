@@ -31,7 +31,7 @@ npm run build
 | User | Account |
 |---|---|
 | `salawu` | Contributor / promoter |
-| `funmilayo` | Vendor (Student Business Profile) |
+| `morayo` | Vendor (Student Business Profile) |
 | `chuka` | Ambassador |
 | `kunle` | Admin |
 

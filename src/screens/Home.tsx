@@ -210,13 +210,13 @@ export default function Home() {
               <Avatar user={byId(state.users, 'u_aisha')} size="sm" showVerified />
               <div className="grow">
                 <span style={{ fontSize: 13 }}><strong>Aisha</strong> earned GrowthProof for <strong>Product photography</strong>.</span>
-                <div className="subtle" style={{ fontSize: 11 }}>{timeAgo(Date.now() - 30 * 86400000)} · Tee shoot for Funmi’s Fashion Corner</div>
+                <div className="subtle" style={{ fontSize: 11 }}>{timeAgo(Date.now() - 30 * 86400000)} · Tee shoot for Morayo’s Fashion Corner</div>
               </div>
             </div>
             <div className="list-item" style={{ cursor: 'default' }}>
-              <Avatar user={byId(state.users, 'u_funmilayo')} size="sm" showVerified />
+              <Avatar user={byId(state.users, 'u_morayo')} size="sm" showVerified />
               <div className="grow">
-                <span style={{ fontSize: 13 }}><strong>Funmi’s Fashion Corner</strong> posted a new Campaign.</span>
+                <span style={{ fontSize: 13 }}><strong>Morayo’s Fashion Corner</strong> posted a new Campaign.</span>
                 <div className="subtle" style={{ fontSize: 11 }}>3 days ago · ₦300 per confirmed lead</div>
               </div>
             </div>

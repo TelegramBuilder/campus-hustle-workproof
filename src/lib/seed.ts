@@ -117,7 +117,7 @@ export function buildSeed(): AppState {
     /* Product photographer — referenced in the activity feed */
     user({ id: 'u_aisha', firstName: 'Aisha', lastName: 'Mohammed', username: 'aisha', displayName: 'Aisha', verificationStatus: 'verified', photo: 'g7', faculty: 'College of Medicine', department: 'Physiotherapy', level: '400', bio: 'Product and event photographer — clean catalogue shots for student businesses, edited in 5 days.', skills: ['Photography', 'Videography', 'Social media'], stats: { acceptedCampaigns: 1, lateDeliveries: 0, onTimeCampaigns: 1, totalApplications: 3 }, createdAt: ago(180 * DAY) }),
     /* Student vendors */
-    user({ id: 'u_funmilayo', firstName: 'Funmilayo', lastName: 'Bakare', username: 'funmilayo', displayName: 'Funmilayo', verificationStatus: 'verified', photo: 'g4', faculty: 'Faculty of Management Sciences', department: 'Accounting', level: '300', bio: 'Runs Funmi’s Fashion Corner — custom-print tees and campus merch. Posts referral Campaigns and hires creators.', skills: ['Social media', 'Sales & referrals', 'Event support'], stats: { acceptedCampaigns: 0, lateDeliveries: 0, onTimeCampaigns: 0, totalApplications: 0 }, createdAt: ago(140 * DAY) }),
+    user({ id: 'u_morayo', firstName: 'Morayo', lastName: 'Bakare', username: 'morayo', displayName: 'Morayo', verificationStatus: 'verified', photo: 'g4', faculty: 'Faculty of Management Sciences', department: 'Accounting', level: '300', bio: 'Runs Morayo’s Fashion Corner — custom-print tees and campus merch. Posts referral Campaigns and hires creators.', skills: ['Social media', 'Sales & referrals', 'Event support'], stats: { acceptedCampaigns: 0, lateDeliveries: 0, onTimeCampaigns: 0, totalApplications: 0 }, createdAt: ago(140 * DAY) }),
     user({ id: 'u_damilola', firstName: 'Damilola', lastName: 'Adewale', username: 'damilola', displayName: 'Damilola', verificationStatus: 'verified', photo: 'g5', faculty: 'Faculty of Law', department: 'Law', level: '400', bio: 'Runs Dami’s Design Studio — brand kits, posters and social kits for student businesses and campus events.', skills: ['Graphic design', 'Content writing', 'Event support'], stats: { acceptedCampaigns: 0, lateDeliveries: 0, onTimeCampaigns: 0, totalApplications: 0 }, createdAt: ago(150 * DAY) }),
     user({ id: 'u_segun', firstName: 'Segun', lastName: 'Taiwo', username: 'segun', displayName: 'Segun', verificationStatus: 'verified', photo: 'g6', faculty: 'Faculty of Environmental Sciences', department: 'Architecture', level: '400', bio: 'Runs New Hall Events Co — open mics, game nights and hall-week experiences with tickets sold by student promoters.', skills: ['Event support', 'Sales & referrals'], stats: { acceptedCampaigns: 0, lateDeliveries: 0, onTimeCampaigns: 0, totalApplications: 0 }, createdAt: ago(130 * DAY) }),
     user({ id: 'u_kunbi', firstName: 'Kunbi', lastName: 'Ojo', username: 'kunbi', displayName: 'Kunbi', verificationStatus: 'verified', photo: 'g8', faculty: 'Faculty of Science', department: 'Mathematics', level: '500', bio: 'Runs Kunbi’s Study Kits — revision packs, past-question compilations and stationery bundles.', skills: ['Tutoring', 'Study support'], stats: { acceptedCampaigns: 0, lateDeliveries: 0, onTimeCampaigns: 0, totalApplications: 0 }, createdAt: ago(120 * DAY) }),
@@ -139,7 +139,7 @@ export function buildSeed(): AppState {
   ];
 
   const businesses: StudentBusinessProfile[] = [
-    { id: 'biz_funmi', userId: 'u_funmilayo', businessName: 'Funmi’s Fashion Corner', category: 'Fashion & merch', cover: 'g3', bio: 'Custom-print tees, hoodies and campus merch delivered around UNILAG. I pay verified promoters per confirmed sale or lead.', services: ['Custom-print tees', 'Hoodies & sweatshirts', 'Campus merch bundles'], evidenceNote: 'Instagram @funmisfashion — 400+ followers, 90+ confirmed orders.', status: 'approved', createdAt: ago(75 * DAY) },
+    { id: 'biz_morayo', userId: 'u_morayo', businessName: 'Morayo’s Fashion Corner', category: 'Fashion & merch', cover: 'g3', bio: 'Custom-print tees, hoodies and campus merch delivered around UNILAG. I pay verified promoters per confirmed sale or lead.', services: ['Custom-print tees', 'Hoodies & sweatshirts', 'Campus merch bundles'], evidenceNote: 'Instagram @morayosfashion — 400+ followers, 90+ confirmed orders.', status: 'approved', createdAt: ago(75 * DAY) },
     { id: 'biz_dami', userId: 'u_damilola', businessName: 'Dami’s Design Studio', category: 'Design & creative studio', cover: 'g7', bio: 'Brand kits, posters and social content for student businesses and campus events.', services: ['Brand kits', 'Poster + social sets', 'Event key visuals'], evidenceNote: 'Portfolio on Behance + 12 client groups served.', status: 'approved', createdAt: ago(80 * DAY) },
     { id: 'biz_segun', userId: 'u_segun', businessName: 'New Hall Events Co', category: 'Events & entertainment', cover: 'g2', bio: 'Open mics, game nights and hall-week experiences. Tickets sold by student promoters with a code on every purchase.', services: ['Open mic nights', 'Game nights', 'Hall-week experiences'], evidenceNote: 'Ran 3 paid events last semester with full halls.', status: 'approved', createdAt: ago(70 * DAY) },
     { id: 'biz_kunbi', userId: 'u_kunbi', businessName: 'Kunbi’s Study Kits', category: 'Books & study materials', cover: 'g8', bio: 'Revision packs, past-question compilations and stationery bundles for science courses.', services: ['Revision packs', 'Past-question compilations', 'Stationery bundles'], evidenceNote: 'Sales ledger from two revision cohorts.', status: 'approved', createdAt: ago(60 * DAY) },
@@ -176,16 +176,16 @@ export function buildSeed(): AppState {
     }),
     /* Aisha's past media task */
     campaign({
-      id: 'm_media_past', ownerUserId: 'u_funmilayo', businessProfileId: 'biz_funmi',
+      id: 'm_media_past', ownerUserId: 'u_morayo', businessProfileId: 'biz_morayo',
       title: 'Product shoot for the Fashion Corner summer tee drop',
       campaignType: 'media_task', rewardType: 'fixed_task', rewardAmount: 20000, rewardDescription: 'Flat ₦20,000 — 15 edited product shots + 3 lifestyle shots.',
-      brief: 'Shoot the new summer tee collection for Funmi’s Fashion Corner: 15 clean product shots on a neutral background plus 3 lifestyle shots worn around campus, delivered as an edited set in 5 days.',
+      brief: 'Shoot the new summer tee collection for Morayo’s Fashion Corner: 15 clean product shots on a neutral background plus 3 lifestyle shots worn around campus, delivered as an edited set in 5 days.',
       desiredOutcome: 'A catalogue I can post on Instagram and reuse for order forms all semester.',
       deliverables: ['15 edited product shots', '3 lifestyle shots', 'Drive link with final set'],
       deadline: ago(32 * DAY), effort: 'large', payment: 'paid_outside', budgetRange: '₦18,000 – ₦25,000',
       skills: ['Photography'], squadEligible: 'individual', zone: 'Sports Centre',
       status: 'growthproof_issued', applicantsCount: 2, createdAt: ago(45 * DAY),
-      snapshot: { title: 'Product shoot for the Fashion Corner summer tee drop', brief: 'Shoot the new summer tee collection for Funmi’s Fashion Corner: 15 clean product shots on a neutral background plus 3 lifestyle shots worn around campus, delivered as an edited set in 5 days.', desiredOutcome: 'A catalogue I can post on Instagram and reuse for order forms all semester.', deliverables: ['15 edited product shots', '3 lifestyle shots', 'Drive link with final set'], deadline: ago(32 * DAY), checklist: ['15 product shots delivered', '3 lifestyle shots', 'Edits approved by vendor'], capturedAt: ago(35 * DAY) },
+      snapshot: { title: 'Product shoot for the Fashion Corner summer tee drop', brief: 'Shoot the new summer tee collection for Morayo’s Fashion Corner: 15 clean product shots on a neutral background plus 3 lifestyle shots worn around campus, delivered as an edited set in 5 days.', desiredOutcome: 'A catalogue I can post on Instagram and reuse for order forms all semester.', deliverables: ['15 edited product shots', '3 lifestyle shots', 'Drive link with final set'], deadline: ago(32 * DAY), checklist: ['15 product shots delivered', '3 lifestyle shots', 'Edits approved by vendor'], capturedAt: ago(35 * DAY) },
     }),
     /* Tunde's past research task */
     campaign({
@@ -230,7 +230,7 @@ export function buildSeed(): AppState {
 
     /* --- live result campaigns --- */
     campaign({
-      id: 'm_lead_1', ownerUserId: 'u_funmilayo', businessProfileId: 'biz_funmi',
+      id: 'm_lead_1', ownerUserId: 'u_morayo', businessProfileId: 'biz_morayo',
       title: 'Leads for the Fashion Corner grand sale',
       campaignType: 'lead', rewardType: 'per_result', rewardAmount: 300, rewardDescription: '₦300 per lead who asks for the sale price list. Bonus ₦1,500 for the top promoter this week.',
       targetResults: 25, confirmedResults: 2,
@@ -240,9 +240,9 @@ export function buildSeed(): AppState {
       skills: ['Sales & referrals', 'Social media'], squadEligible: 'individual', zone: 'Faculty of Management Sciences',
       status: 'open', applicantsCount: 3, createdAt: ago(3 * DAY),
       resultProofs: [
-        proof({ id: 'rp_1', promoterId: 'u_salawu', description: 'Adaeze from Accounting 200 asked for the price list — she wants 3 tees for her hall team.', customerRef: 'Chat: Funmi’s Fashion corner', status: 'submitted', createdAt: ago(5 * HOUR) }),
-        proof({ id: 'rp_2', promoterId: 'u_funke', description: 'Referred my whole hostel floor — 6 people asked for the sale list for hoodies.', customerRef: 'Moremi A-floor group', status: 'vendor_confirmed', createdAt: ago(2 * DAY), decidedBy: 'u_funmilayo', decidedAt: ago(1 * DAY), note: 'Confirmed in the floor group — 6 names.', growthproofId: 'wp_funke_1' }),
-        proof({ id: 'rp_3', promoterId: 'u_emeka', description: 'Claim: sold 2 tees to ENGR300 students.', customerRef: '', status: 'rejected', createdAt: ago(3 * DAY), decidedBy: 'u_funmilayo', decidedAt: ago(2 * DAY), note: 'No receipt or chat to verify — please resubmit with one.' }),
+        proof({ id: 'rp_1', promoterId: 'u_salawu', description: 'Adaeze from Accounting 200 asked for the price list — she wants 3 tees for her hall team.', customerRef: 'Chat: Morayo’s Fashion corner', status: 'submitted', createdAt: ago(5 * HOUR) }),
+        proof({ id: 'rp_2', promoterId: 'u_funke', description: 'Referred my whole hostel floor — 6 people asked for the sale list for hoodies.', customerRef: 'Moremi A-floor group', status: 'vendor_confirmed', createdAt: ago(2 * DAY), decidedBy: 'u_morayo', decidedAt: ago(1 * DAY), note: 'Confirmed in the floor group — 6 names.', growthproofId: 'wp_funke_1' }),
+        proof({ id: 'rp_3', promoterId: 'u_emeka', description: 'Claim: sold 2 tees to ENGR300 students.', customerRef: '', status: 'rejected', createdAt: ago(3 * DAY), decidedBy: 'u_morayo', decidedAt: ago(2 * DAY), note: 'No receipt or chat to verify — please resubmit with one.' }),
       ],
     }),
     campaign({
@@ -260,7 +260,7 @@ export function buildSeed(): AppState {
 
     /* --- live task campaigns --- */
     campaign({
-      id: 'm_media_1', ownerUserId: 'u_funmilayo', businessProfileId: 'biz_funmi',
+      id: 'm_media_1', ownerUserId: 'u_morayo', businessProfileId: 'biz_morayo',
       title: 'Product photos for the hoodie restock',
       campaignType: 'media_task', rewardType: 'fixed_task', rewardAmount: 18000, rewardDescription: 'Flat ₦18,000 — 20 edited shots of the new hoodies.',
       brief: 'Photograph the new hoodie colours for the Fashion Corner restock: 20 clean product shots plus 2 lifestyle shots worn around campus. Same style as my summer tee shoot.',
@@ -334,14 +334,14 @@ export function buildSeed(): AppState {
   const growthproof: GrowthProofEntry[] = [
     wp({ id: 'wp_1', userId: 'u_salawu', campaignId: 'm_done_1', campaignTitle: 'Brand kit for the Inter-Hall Debate Finals', role: 'Designer', campaignType: 'content_task', skills: ['Graphic design', 'Social media'], businessName: 'Dami’s Design Studio', acceptedAt: ago(58 * DAY), rating: 5, onTime: true, feedback: 'Salawu turned the brief around in three days — the trials announcement post alone got 1,200+ views.', visibility: 'public' }),
     wp({ id: 'wp_2', userId: 'u_salawu', campaignId: 'm_done_2', campaignTitle: 'Tickets for the Faculty Week Culture Night', role: 'Ticket promoter', campaignType: 'ticket_sale', skills: ['Sales & referrals'], businessName: 'New Hall Events Co', acceptedAt: ago(39 * DAY), rating: 5, onTime: true, feedback: '12 tickets confirmed against the door list, all in one batch. Salawu is the promoter other vendors ask about.', visibility: 'public' }),
-    wp({ id: 'wp_3', userId: 'u_aisha', campaignId: 'm_media_past', campaignTitle: 'Product shoot for the Fashion Corner summer tee drop', role: 'Product photographer', campaignType: 'media_task', skills: ['Photography'], businessName: 'Funmi’s Fashion Corner', acceptedAt: ago(30 * DAY), rating: 5, onTime: true, feedback: '18 clean shots, delivered a day early, zero chasing. The catalogue posts doubled order enquiries.', visibility: 'campus' }),
+    wp({ id: 'wp_3', userId: 'u_aisha', campaignId: 'm_media_past', campaignTitle: 'Product shoot for the Fashion Corner summer tee drop', role: 'Product photographer', campaignType: 'media_task', skills: ['Photography'], businessName: 'Morayo’s Fashion Corner', acceptedAt: ago(30 * DAY), rating: 5, onTime: true, feedback: '18 clean shots, delivered a day early, zero chasing. The catalogue posts doubled order enquiries.', visibility: 'campus' }),
     wp({ id: 'wp_4', userId: 'u_ngozi', campaignId: 'm_done_1', campaignTitle: 'Brand kit for the Inter-Hall Debate Finals', role: 'Writer', campaignType: 'content_task', skills: ['Content writing'], businessName: 'Dami’s Design Studio', acceptedAt: ago(58 * DAY), rating: 5, onTime: true, feedback: 'Copy was sharp and on-voice for the client.', visibility: 'campus' }),
     wp({ id: 'wp_5', userId: 'u_tunde', campaignId: 'm_research_past', campaignTitle: 'Pricing survey for the MTH101 revision pack', role: 'Research support', campaignType: 'research_task', skills: ['Excel / data support', 'Study support'], businessName: 'Kunbi’s Study Kits', acceptedAt: ago(20 * DAY), rating: 4, onTime: false, feedback: 'Solid interviews and honest quotes — summary landed one day late.', visibility: 'campus' }),
     wp({ id: 'wp_6', userId: 'u_seyi', campaignId: 'm_squad_past', campaignTitle: 'Open Mic recap film (3 minutes)', role: 'Squad Lead · Videographer', campaignType: 'media_task', skills: ['Videography', 'Event support'], businessName: 'New Hall Events Co', acceptedAt: ago(25 * DAY), rating: 5, onTime: true, feedback: 'Squad covered two stages at once without missing a beat.', visibility: 'campus' }),
     wp({ id: 'wp_7', userId: 'u_ruth', campaignId: 'm_squad_past', campaignTitle: 'Open Mic recap film (3 minutes)', role: 'Social media support', campaignType: 'media_task', skills: ['Social media'], businessName: 'New Hall Events Co', acceptedAt: ago(25 * DAY), rating: 5, onTime: true, feedback: 'Posted live updates through the whole night.', visibility: 'campus' }),
     wp({ id: 'wp_8', userId: 'u_emeka', campaignId: 'm_squad_past', campaignTitle: 'Open Mic recap film (3 minutes)', role: 'Videographer', campaignType: 'media_task', skills: ['Videography'], businessName: 'New Hall Events Co', acceptedAt: ago(25 * DAY), rating: 5, onTime: true, feedback: 'Footage cut together beautifully.', visibility: 'campus' }),
     wp({ id: 'wp_9', userId: 'u_kemi', campaignId: 'm_kemi_past', campaignTitle: 'Client leads for the Design Studio', role: 'Lead promoter', campaignType: 'lead', skills: ['Sales & referrals'], businessName: 'Dami’s Design Studio', acceptedAt: ago(15 * DAY), rating: 5, onTime: true, feedback: 'Referred the Mass Comm Society president — closed a logo + poster kit from one lead.', visibility: 'campus' }),
-    wp({ id: 'wp_funke_1', userId: 'u_funke', campaignId: 'm_lead_1', campaignTitle: 'Leads for the Fashion Corner grand sale', role: 'Lead promoter', campaignType: 'lead', skills: ['Sales & referrals'], businessName: 'Funmi’s Fashion Corner', acceptedAt: ago(1 * DAY), rating: 5, onTime: true, feedback: 'Six leads from one hostel floor group — confirmed in the chat.', visibility: 'campus' }),
+    wp({ id: 'wp_funke_1', userId: 'u_funke', campaignId: 'm_lead_1', campaignTitle: 'Leads for the Fashion Corner grand sale', role: 'Lead promoter', campaignType: 'lead', skills: ['Sales & referrals'], businessName: 'Morayo’s Fashion Corner', acceptedAt: ago(1 * DAY), rating: 5, onTime: true, feedback: 'Six leads from one hostel floor group — confirmed in the chat.', visibility: 'campus' }),
     wp({ id: 'wp_yomi_1', userId: 'u_yomi', campaignId: 'm_tickets_1', campaignTitle: 'Tickets for the New Hall Open Mic night', role: 'Ticket promoter', campaignType: 'ticket_sale', skills: ['Sales & referrals'], businessName: 'New Hall Events Co', acceptedAt: ago(4 * DAY), rating: 5, onTime: true, feedback: 'First 4 early-bird tickets sold within hours of joining.', visibility: 'campus' }),
   ];
 
@@ -382,19 +382,19 @@ export function buildSeed(): AppState {
   ];
 
   const conversations: Conversation[] = [
-    conv({ id: 'cv_1', participantIds: ['u_salawu', 'u_funmilayo'], campaignId: 'm_lead_1', lastMessageAt: ago(5 * HOUR), fileSharingOpen: true }),
+    conv({ id: 'cv_1', participantIds: ['u_salawu', 'u_morayo'], campaignId: 'm_lead_1', lastMessageAt: ago(5 * HOUR), fileSharingOpen: true }),
     conv({ id: 'cv_2', participantIds: ['u_salawu', 'u_damilola'], campaignId: 'm_done_1', lastMessageAt: ago(2 * DAY), fileSharingOpen: true }),
-    conv({ id: 'cv_3', participantIds: ['u_aisha', 'u_funmilayo'], campaignId: 'm_media_1', lastMessageAt: ago(1 * HOUR), fileSharingOpen: true }),
+    conv({ id: 'cv_3', participantIds: ['u_aisha', 'u_morayo'], campaignId: 'm_media_1', lastMessageAt: ago(1 * HOUR), fileSharingOpen: true }),
     conv({ id: 'cv_4', participantIds: ['u_ngozi', 'u_damilola'], campaignId: 'm_debate_1', lastMessageAt: ago(3 * HOUR), fileSharingOpen: true }),
     conv({ id: 'cv_5', participantIds: ['u_seyi', 'u_segun'], campaignId: 'm_squad_1', lastMessageAt: ago(30 * MIN), fileSharingOpen: true }),
     conv({ id: 'cv_6', participantIds: ['u_salawu', 'u_chuka'], lastMessageAt: ago(1 * DAY), fileSharingOpen: false }),
   ];
 
   const messages: Message[] = [
-    msg({ id: 'm_1', conversationId: 'cv_1', senderId: 'u_salawu', text: 'Hi Funmilayo! I just submitted proof for a lead — Adaeze from Accounting 200 wants the price list for 3 tees.', createdAt: ago(5 * HOUR) }),
-    msg({ id: 'm_2', conversationId: 'cv_1', senderId: 'u_funmilayo', text: 'Nice one — saw the proof. Chatting with her now; I’ll confirm it today. Keep sharing your code REF-8K2P!', createdAt: ago(4 * HOUR), readBy: ['u_salawu'] }),
+    msg({ id: 'm_1', conversationId: 'cv_1', senderId: 'u_salawu', text: 'Hi Morayo! I just submitted proof for a lead — Adaeze from Accounting 200 wants the price list for 3 tees.', createdAt: ago(5 * HOUR) }),
+    msg({ id: 'm_2', conversationId: 'cv_1', senderId: 'u_morayo', text: 'Nice one — saw the proof. Chatting with her now; I’ll confirm it today. Keep sharing your code REF-8K2P!', createdAt: ago(4 * HOUR), readBy: ['u_salawu'] }),
     msg({ id: 'm_3', conversationId: 'cv_2', senderId: 'u_damilola', text: 'The Debate exec loved the kit. Your GrowthProof entry is live on your Passport 🎉', createdAt: ago(2 * DAY), readBy: ['u_salawu'] }),
-    msg({ id: 'm_4', conversationId: 'cv_3', senderId: 'u_funmilayo', text: 'Reminder — hoodie shoot is Saturday. Bring your backdrop; the new colours are ready at my room block gate by 8am.', createdAt: ago(1 * HOUR), readBy: ['u_aisha'] }),
+    msg({ id: 'm_4', conversationId: 'cv_3', senderId: 'u_morayo', text: 'Reminder — hoodie shoot is Saturday. Bring your backdrop; the new colours are ready at my room block gate by 8am.', createdAt: ago(1 * HOUR), readBy: ['u_aisha'] }),
     msg({ id: 'm_5', conversationId: 'cv_4', senderId: 'u_damilola', text: 'Your writing sample was excellent. Are you free to discuss the poster + posts this week?', createdAt: ago(3 * HOUR) }),
     msg({ id: 'm_6', conversationId: 'cv_5', senderId: 'u_segun', text: 'Squad confirmed for the sizzle reel. Game night coverage starts Thursday 7pm.', createdAt: ago(30 * MIN) }),
     msg({ id: 'm_7', conversationId: 'cv_6', senderId: 'u_chuka', text: 'Hey Salawu! One confirmed result from Proven Contributor — know any vendors who should post Campaigns on GrowthProof?', createdAt: ago(1 * DAY), readBy: ['u_salawu'] }),
@@ -402,8 +402,8 @@ export function buildSeed(): AppState {
 
   const auditLog = [
     { id: 'al_1', actorId: 'u_admin', action: 'approve_business', targetType: 'business', targetId: 'biz_dami', detail: 'Dami’s Design Studio approved', createdAt: ago(80 * DAY) },
-    { id: 'al_2', actorId: 'u_admin', action: 'approve_business', targetType: 'business', targetId: 'biz_funmi', detail: 'Funmi’s Fashion Corner approved', createdAt: ago(75 * DAY) },
-    { id: 'al_3', actorId: 'u_funmilayo', action: 'confirm_result_proof', targetType: 'campaign', targetId: 'm_lead_1', detail: 'Confirmed lead proof from Funke', createdAt: ago(1 * DAY) },
+    { id: 'al_2', actorId: 'u_admin', action: 'approve_business', targetType: 'business', targetId: 'biz_morayo', detail: 'Morayo’s Fashion Corner approved', createdAt: ago(75 * DAY) },
+    { id: 'al_3', actorId: 'u_morayo', action: 'confirm_result_proof', targetType: 'campaign', targetId: 'm_lead_1', detail: 'Confirmed lead proof from Funke', createdAt: ago(1 * DAY) },
     { id: 'al_4', actorId: 'u_segun', action: 'confirm_result_proof', targetType: 'campaign', targetId: 'm_done_2', detail: 'Confirmed 12 tickets from Salawu', createdAt: ago(39 * DAY) },
   ];
 
@@ -431,7 +431,7 @@ export function buildSeed(): AppState {
     reviews: [
       { id: 'rv_1', targetId: 'u_salawu', authorId: 'u_damilola', growthproofId: 'wp_1', campaignId: 'm_done_1', rating: 5, reason: 'quality', text: 'Sharp, on-brand and delivered three days early.', hidden: false, createdAt: ago(58 * DAY) },
       { id: 'rv_2', targetId: 'u_salawu', authorId: 'u_segun', growthproofId: 'wp_2', campaignId: 'm_done_2', rating: 5, reason: 'reliability', text: '12 tickets confirmed against the door list, all in one batch.', hidden: false, createdAt: ago(39 * DAY) },
-      { id: 'rv_3', targetId: 'u_aisha', authorId: 'u_funmilayo', growthproofId: 'wp_3', campaignId: 'm_media_past', rating: 5, reason: 'quality', text: '18 shots, delivered a day early, zero chasing.', hidden: false, createdAt: ago(30 * DAY) },
+      { id: 'rv_3', targetId: 'u_aisha', authorId: 'u_morayo', growthproofId: 'wp_3', campaignId: 'm_media_past', rating: 5, reason: 'quality', text: '18 shots, delivered a day early, zero chasing.', hidden: false, createdAt: ago(30 * DAY) },
       { id: 'rv_4', targetId: 'u_seyi', authorId: 'u_segun', growthproofId: 'wp_6', campaignId: 'm_squad_past', rating: 5, reason: 'communication', text: 'Squad lead who actually coordinates.', hidden: false, createdAt: ago(25 * DAY) },
       { id: 'rv_5', targetId: 'u_kemi', authorId: 'u_damilola', growthproofId: 'wp_9', campaignId: 'm_kemi_past', rating: 5, reason: 'professionalism', text: 'One lead closed a logo + poster kit.', hidden: false, createdAt: ago(15 * DAY) },
       { id: 'rv_6', targetId: 'u_tunde', authorId: 'u_kunbi', growthproofId: 'wp_5', campaignId: 'm_research_past', rating: 4, reason: 'communication', text: 'Excellent interviews; watch the delivery date.', hidden: false, createdAt: ago(20 * DAY) },
@@ -441,15 +441,15 @@ export function buildSeed(): AppState {
       { id: 'rep_2', reporterId: 'u_aisha', targetType: 'campaign', targetId: 'm_debate_1', reason: 'other', details: 'Duplicate poster Campaign posted by a non-owner account — resolved by admin after owner confirmed.', status: 'resolved', resolvedBy: 'u_admin', resolvedAt: ago(3 * DAY), resolution: 'Duplicate removed; user warned about impersonation.', createdAt: ago(3 * DAY) },
     ],
     notifications: [
-      { id: 'n_1', userId: 'u_salawu', kind: 'message', title: 'New message from Funmilayo', body: '“Nice one — saw the proof…”', link: '/app/chat/cv_1', createdAt: ago(4 * HOUR), read: false },
+      { id: 'n_1', userId: 'u_salawu', kind: 'message', title: 'New message from Morayo', body: '“Nice one — saw the proof…”', link: '/app/chat/cv_1', createdAt: ago(4 * HOUR), read: false },
       { id: 'n_2', userId: 'u_salawu', kind: 'campaign', title: 'Campaign matches your skills', body: '“Leads for the Fashion Corner grand sale” is still open — you joined as a promoter.', link: '/app/campaign/m_lead_1', createdAt: ago(3 * DAY), read: true },
-      { id: 'n_3', userId: 'u_salawu', kind: 'result', title: 'Result proof submitted', body: 'Your lead proof is with Funmilayo — you’ll be notified when she confirms it.', link: '/app/campaign/m_lead_1', createdAt: ago(5 * HOUR), read: true },
+      { id: 'n_3', userId: 'u_salawu', kind: 'result', title: 'Result proof submitted', body: 'Your lead proof is with Morayo — you’ll be notified when she confirms it.', link: '/app/campaign/m_lead_1', createdAt: ago(5 * HOUR), read: true },
       { id: 'n_4', userId: 'u_salawu', kind: 'growthproof', title: 'GrowthProof entry issued', body: '“Tickets for the Faculty Week Culture Night” added to your Passport.', link: '/app/passport', createdAt: ago(38 * DAY), read: true },
       { id: 'n_5', userId: 'u_salawu', kind: 'system', title: 'One confirmed result from Proven Contributor', body: 'Complete one more accepted Campaign (needs 3 GrowthProof entries, rating ≥ 4.0) to reach Proven Contributor.', link: '/app/passport', createdAt: ago(1 * DAY), read: false },
       { id: 'n_6', userId: 'u_admin', kind: 'verification', title: 'New verification submitted', body: 'Gbenga Adepoju submitted documents.', link: '/admin/verifications', createdAt: ago(2 * DAY), read: false },
       { id: 'n_7', userId: 'u_admin', kind: 'business', title: 'Student business application', body: 'Taiwo applied to run “Taiwo’s Proofing Desk”.', link: '/admin/businesses', createdAt: ago(2 * DAY), read: false },
       { id: 'n_8', userId: 'u_admin', kind: 'campaign', title: 'Campaign awaiting review', body: '“Proofreading flyer for Taiwo’s Proofing Desk”.', link: '/admin/campaigns', createdAt: ago(1 * DAY), read: false },
-      { id: 'n_9', userId: 'u_funmilayo', kind: 'result', title: 'New result proof to confirm', body: 'Salawu submitted a lead on “Leads for the Fashion Corner grand sale”.', link: '/app/campaign/m_lead_1', createdAt: ago(5 * HOUR), read: false },
+      { id: 'n_9', userId: 'u_morayo', kind: 'result', title: 'New result proof to confirm', body: 'Salawu submitted a lead on “Leads for the Fashion Corner grand sale”.', link: '/app/campaign/m_lead_1', createdAt: ago(5 * HOUR), read: false },
       { id: 'n_10', userId: 'u_chuka', kind: 'system', title: 'Reward status updated', body: 'You’re one completed Campaign away from your monthly reward.', link: '/ambassador', createdAt: ago(2 * DAY), read: false },
     ],
     ambassadors: [

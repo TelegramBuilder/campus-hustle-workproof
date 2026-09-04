@@ -6,7 +6,7 @@ import { IconBack, IconShield, IconCrown, IconTarget, IconUser, IconPassport } f
 
 const DEMO_ACCOUNTS = [
   { username: 'salawu', label: 'Promoter & creator', desc: 'Salawu — joins Campaigns, submits proof, earns GrowthProof', icon: <IconPassport size={16} />, bg: 'linear-gradient(135deg,#0b8c66,#065f46)' },
-  { username: 'funmilayo', label: 'Student vendor', desc: 'Funmilayo — post Campaigns & confirm results', icon: <IconTarget size={16} />, bg: 'linear-gradient(135deg,#1d4ed8,#3730a3)' },
+  { username: 'morayo', label: 'Student vendor', desc: 'Morayo — post Campaigns & confirm results', icon: <IconTarget size={16} />, bg: 'linear-gradient(135deg,#1d4ed8,#3730a3)' },
   { username: 'tobi', label: 'New student', desc: 'Tobi — finishes verification first', icon: <IconUser size={16} />, bg: 'linear-gradient(135deg,#0284c7,#075985)' },
   { username: 'chuka', label: 'Campus ambassador', desc: 'Chuka — ambassador HQ: recruit, help, earn rewards', icon: <IconShield size={16} />, bg: 'linear-gradient(135deg,#7c3aed,#5b21b6)' },
   { username: 'admin', label: 'Campus admin', desc: 'Kunle — moderation, verifications & approvals', icon: <IconCrown size={16} />, bg: 'linear-gradient(135deg,#ea580c,#c2410c)' },

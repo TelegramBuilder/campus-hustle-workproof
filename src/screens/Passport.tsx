@@ -390,7 +390,7 @@ export default function Passport() {
           <span>🛡️</span>
           <span style={{ fontSize: 12.5 }}>Any verified UNILAG student can register the business they actually run on campus — merch, food, prints, design, tickets, services. Admins review each application before you can post Campaigns. No association or society membership needed.</span>
         </div>
-        <Field label="Business name" hint="What students know you as, e.g. “Funmi’s Fashion Corner”.">
+        <Field label="Business name" hint="What students know you as, e.g. “Morayo’s Fashion Corner”.">
           <Input placeholder="e.g. Kunbi’s Study Kits" value={bizForm.businessName} onChange={(e) => setBizForm({ ...bizForm, businessName: e.target.value })} />
         </Field>
         <Field label="Category">
@@ -402,7 +402,7 @@ export default function Passport() {
           <Textarea placeholder={'Custom-print tees\nHoodies & sweatshirts\nCampus merch bundles'} value={bizForm.services} onChange={(e) => setBizForm({ ...bizForm, services: e.target.value })} style={{ minHeight: 72 }} />
         </Field>
         <Field label="Evidence (optional)" hint="Link or note admins can check — Instagram, catalogue, past orders. Never share bank or card details here.">
-          <Textarea placeholder="e.g. Instagram @funmisfashion — 400+ followers, 90+ orders confirmed" value={bizForm.evidenceNote} onChange={(e) => setBizForm({ ...bizForm, evidenceNote: e.target.value })} style={{ minHeight: 52 }} />
+          <Textarea placeholder="e.g. Instagram @morayosfashion — 400+ followers, 90+ orders confirmed" value={bizForm.evidenceNote} onChange={(e) => setBizForm({ ...bizForm, evidenceNote: e.target.value })} style={{ minHeight: 52 }} />
         </Field>
         <Field label="Business cover" hint="The banner colour students see on your business and Campaigns.">
           <div className="row wrap" style={{ gap: 10 }}>

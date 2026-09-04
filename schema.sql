@@ -70,7 +70,7 @@ insert into auth.users (
  'salawu@demo.campushustle.app', crypt('password123', gen_salt('bf')), now(),
  '{"provider":"email","providers":["email"]}', '{}', now(), now(), '', ''),
 ('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000102', 'authenticated', 'authenticated',
- 'funmilayo@demo.campushustle.app', crypt('password123', gen_salt('bf')), now(),
+ 'morayo@demo.campushustle.app', crypt('password123', gen_salt('bf')), now(),
  '{"provider":"email","providers":["email"]}', '{}', now(), now(), '', ''),
 ('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000103', 'authenticated', 'authenticated',
  'tobi@demo.campushustle.app', crypt('password123', gen_salt('bf')), now(),

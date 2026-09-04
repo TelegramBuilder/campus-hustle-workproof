@@ -404,7 +404,7 @@ export function skillCheckedTracks(u?: User | null): string[] {
 /* ---------- demo auto-replies ---------- */
 
 const REPLIES: Record<string, string[]> = {
-  u_funmilayo: ['Noted, thank you!', 'Great — I’ll update the committee.', 'Perfect, I’ll confirm soon.'],
+  u_morayo: ['Noted, thank you!', 'Great — I’ll update the committee.', 'Perfect, I’ll confirm soon.'],
   u_damilola: ['Thanks for the update!', 'Got it 👍', 'The exec will love this.'],
   u_segun: ['Thanks — I’ll check with the team.', 'Noted!', 'Alright, keep me posted.'],
   u_kunbi: ['Thank you!', 'That works for us.', 'Noted.' ],
