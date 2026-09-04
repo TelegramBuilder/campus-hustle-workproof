@@ -1,7 +1,5 @@
 # Supabase configuration — required by the GitHub database-branches integration.
-# Replace YOUR_PROJECT_REF below: the short id in your project URL
-# (e.g. https://<PROJECT_REF>.supabase.co → ref looks like "abcdef").
-project_id = "YOUR_PROJECT_REF"
+project_id = "hzprxhmqjqtpziiohqhq"
 project_name = "campus-hustle-workproof"
 
 [api]
