@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { Navigate, NavLink, Outlet, useLocation } from 'react-router-dom';
-import { useApp, currentUser, totalUnread, currentEarnMode } from '../lib/store';
+import { useApp, currentUser, totalUnread, currentEarnMode, cloudStatus } from '../lib/store';
 import { Guide } from '../components/Guide';
 import { IconHome, IconTarget, IconPlus, IconChat, IconPassport } from '../components/icons';
 
@@ -7,6 +8,10 @@ export default function AppShell() {
   const { state } = useApp();
   const location = useLocation();
   const me = currentUser();
+  const [dismissed, setDismissed] = useState(() => {
+    try { return localStorage.getItem('ch_fallback_dismissed') === '1'; } catch { return false; }
+  });
+  const cloud = cloudStatus();
   const earnLabel = currentEarnMode() === 'skills' ? 'Missions' : 'Campaigns';
   void state;
 
@@ -23,8 +28,22 @@ export default function AppShell() {
     </NavLink>
   );
 
+  const dismissFallback = () => {
+    try { localStorage.setItem('ch_fallback_dismissed', '1'); } catch { /* ignore */ }
+    setDismissed(true);
+  };
+
   return (
     <div className="app-frame">
+      {cloud === 'fallback' && !dismissed && (
+        <div className="cloud-fallback-banner" role="note">
+          <span>
+            <strong>Demo mode</strong> — cloud sync isn&apos;t connected yet, so edits stay on this device.
+            Set up the Supabase database (Help &amp; safety → Cloud setup) to sync across devices.
+          </span>
+          <button onClick={dismissFallback} aria-label="Dismiss">×</button>
+        </div>
+      )}
       {isChat ? (
         <Outlet />
       ) : (

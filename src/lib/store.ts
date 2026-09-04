@@ -85,6 +85,13 @@ let remoteQueued: string | null = null;
 let lastEnteredUid = '';
 let lastEnterAt = 0;
 
+/** UI-visible cloud state: 'cloud' (syncing), 'fallback' (cloud auth failed → local demo), 'local' (no keys). */
+let fallbackActive = false;
+export function cloudStatus(): 'cloud' | 'fallback' | 'local' {
+  if (!cloudReady) return 'local';
+  return fallbackActive ? 'fallback' : 'cloud';
+}
+
 /** Stable serialization (sorted keys) so DB echo reads compare cleanly. */
 function canon(v: any): string {
   if (v === null || typeof v !== 'object') return JSON.stringify(v);
@@ -196,8 +203,9 @@ export async function bootstrapCloud(): Promise<void> {
     if (data.session?.user) await enterWorld(data.session.user);
   } catch { /* offline — remain local until next load */ }
   sb.auth.onAuthStateChange((_e, session) => {
-    if (session?.user) void enterWorld(session.user);
-    else void actions.logout();
+    if (session?.user) {
+      try { void enterWorld(session.user); } catch { /* DB tables not ready — stay local */ }
+    } else void actions.logout();
   });
 }
 
@@ -567,11 +575,24 @@ export const actions = {
       state.sessionUserId = u.id; // guard: a remote snapshot must not drop this identity
       const { error } = await sb.auth.signInWithPassword({ email, password });
       if (error) {
-        state.sessionUserId = null;
-        return cloudLoginHint(error.message);
+        // Cloud DB not set up yet (schema.sql / migration not applied): keep the
+        // demo usable locally for seeded accounts — sync turns on automatically
+        // the moment the database is ready.
+        if (DEMO_USERNAMES.has(u.username.toLowerCase())) {
+          console.warn('[cloud] auth failed for demo account — falling back to local demo:', error.message);
+          fallbackActive = true;
+          state.sessionUserId = u.id;
+        } else {
+          state.sessionUserId = null;
+          return cloudLoginHint(error.message);
+        }
+      } else {
+        fallbackActive = false;
+        const { data } = await sb.auth.getSession();
+        if (data.session?.user) {
+          try { await enterWorld(data.session.user); } catch { /* DB tables not ready — stay local */ }
+        }
       }
-      const { data } = await sb.auth.getSession();
-      if (data.session?.user) await enterWorld(data.session.user);
     } else {
       state.sessionUserId = u.id;
     }

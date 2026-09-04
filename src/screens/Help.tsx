@@ -73,6 +73,17 @@ export default function Help() {
           </div>
         </div>
 
+        <div className="card card-pad" style={{ borderColor: 'var(--green)', marginBottom: 16 }}>
+          <h3 style={{ marginBottom: 6 }}>☁️ Cloud setup (sync across devices)</h3>
+          <div className="col" style={{ gap: 8, fontSize: 13, lineHeight: 1.5 }}>
+            <p>The app can share one campus &ldquo;world&rdquo; so a profile edit on your laptop appears on your phone. It needs a one-time database setup in Supabase:</p>
+            <p>1. Open <strong>supabase.com → your project → SQL Editor</strong>.</p>
+            <p>2. Paste the whole contents of <strong>schema.sql</strong> (repo root) and press <strong>Run</strong>. This creates the world, security rules, and the demo accounts (password <code>password123</code>).</p>
+            <p>3. Under <strong>Authentication → Sign In / Providers → Email</strong>, switch <strong>Confirm email</strong> OFF so sign-ups log in instantly.</p>
+            <p className="subtle" style={{ fontSize: 12 }}>Until that runs, you&apos;re on the local demo (a banner on Home reminds you). The moment the database is ready, logins switch to real accounts and edits sync automatically.</p>
+          </div>
+        </div>
+
         <div className="card card-pad" style={{ borderColor: 'var(--gold)', marginBottom: 16 }}>
           <h3 style={{ marginBottom: 6 }}>🗺️ Live now vs building</h3>
           <div className="col" style={{ gap: 8, fontSize: 13, lineHeight: 1.5 }}>
