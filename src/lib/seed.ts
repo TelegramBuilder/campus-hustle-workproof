@@ -107,7 +107,7 @@ export function buildSeed(): AppState {
   const users: User[] = [
     user({ id: 'u_super', firstName: 'Amina', lastName: 'Bello', username: 'super', role: 'superadmin', verificationStatus: 'verified', photo: 'g5', email: 'amina.bello@campushustle.io', bio: 'Super admin — building proof of work for African students.' }),
     user({ id: 'u_admin', firstName: 'Kunle', lastName: 'Adeyemi', username: 'admin', role: 'admin', verificationStatus: 'verified', photo: 'g3', email: 'kunle.adeyemi@unilag.edu.ng', bio: 'Campus admin, UNILAG. Verifies students, approves student businesses and moderates Campaigns.', stats: { acceptedCampaigns: 0, lateDeliveries: 0, onTimeCampaigns: 0, totalApplications: 0 } }),
-    user({ id: 'u_chuka', firstName: 'Chuka', lastName: 'Okafor', username: 'chuka', role: 'ambassador', verificationStatus: 'verified', photo: 'g2', ambassadorId: 'amb_1', faculty: 'Faculty of Management Sciences', department: 'Business Administration', level: '400', showDepartment: true, bio: 'Campus ambassador — recruiting student vendors and quality promoters who stick.' }),
+    user({ id: 'u_chiamaka', firstName: 'Chiamaka', lastName: 'Okafor', username: 'chiamaka', role: 'ambassador', verificationStatus: 'verified', photo: 'g2', ambassadorId: 'amb_1', faculty: 'Faculty of Management Sciences', department: 'Business Administration', level: '400', showDepartment: true, bio: 'Campus ambassador — recruiting student vendors and quality promoters who stick.' }),
     user({ id: 'u_bola', firstName: 'Bola', lastName: 'Fashola', username: 'bola', role: 'ambassador', verificationStatus: 'verified', photo: 'g4', ambassadorId: 'amb_2', faculty: 'Faculty of Social Sciences', department: 'Mass Communication', level: '300', showDepartment: true }),
     /* The demo student — 2 GrowthProof entries, close to Proven Contributor */
     user({ id: 'u_salawu', firstName: 'Salawu', lastName: 'Oladipo', username: 'salawu', displayName: 'Salawu', verificationStatus: 'verified', photo: 'g1', faculty: 'Faculty of Social Sciences', department: 'Mass Communication', level: '300', showDepartment: true, matricNo: '220403012', bio: 'Designer and campus promoter. Brand kits for student businesses and events, and I sell tickets and leads I actually believe in.', skills: ['Graphic design', 'Social media', 'Content writing', 'Sales & referrals'], stats: { acceptedCampaigns: 2, lateDeliveries: 0, onTimeCampaigns: 2, totalApplications: 6 }, portfolio: [
@@ -387,7 +387,7 @@ export function buildSeed(): AppState {
     conv({ id: 'cv_3', participantIds: ['u_aisha', 'u_morayo'], campaignId: 'm_media_1', lastMessageAt: ago(1 * HOUR), fileSharingOpen: true }),
     conv({ id: 'cv_4', participantIds: ['u_ngozi', 'u_damilola'], campaignId: 'm_debate_1', lastMessageAt: ago(3 * HOUR), fileSharingOpen: true }),
     conv({ id: 'cv_5', participantIds: ['u_seyi', 'u_segun'], campaignId: 'm_squad_1', lastMessageAt: ago(30 * MIN), fileSharingOpen: true }),
-    conv({ id: 'cv_6', participantIds: ['u_salawu', 'u_chuka'], lastMessageAt: ago(1 * DAY), fileSharingOpen: false }),
+    conv({ id: 'cv_6', participantIds: ['u_salawu', 'u_chiamaka'], lastMessageAt: ago(1 * DAY), fileSharingOpen: false }),
   ];
 
   const messages: Message[] = [
@@ -397,7 +397,7 @@ export function buildSeed(): AppState {
     msg({ id: 'm_4', conversationId: 'cv_3', senderId: 'u_morayo', text: 'Reminder — hoodie shoot is Saturday. Bring your backdrop; the new colours are ready at my room block gate by 8am.', createdAt: ago(1 * HOUR), readBy: ['u_aisha'] }),
     msg({ id: 'm_5', conversationId: 'cv_4', senderId: 'u_damilola', text: 'Your writing sample was excellent. Are you free to discuss the poster + posts this week?', createdAt: ago(3 * HOUR) }),
     msg({ id: 'm_6', conversationId: 'cv_5', senderId: 'u_segun', text: 'Squad confirmed for the sizzle reel. Game night coverage starts Thursday 7pm.', createdAt: ago(30 * MIN) }),
-    msg({ id: 'm_7', conversationId: 'cv_6', senderId: 'u_chuka', text: 'Hey Salawu! One confirmed result from Proven Contributor — know any vendors who should post Campaigns on GrowthProof?', createdAt: ago(1 * DAY), readBy: ['u_salawu'] }),
+    msg({ id: 'm_7', conversationId: 'cv_6', senderId: 'u_chiamaka', text: 'Hey Salawu! One confirmed result from Proven Contributor — know any vendors who should post Campaigns on GrowthProof?', createdAt: ago(1 * DAY), readBy: ['u_salawu'] }),
   ];
 
   const auditLog = [
@@ -450,10 +450,10 @@ export function buildSeed(): AppState {
       { id: 'n_7', userId: 'u_admin', kind: 'business', title: 'Student business application', body: 'Taiwo applied to run “Taiwo’s Proofing Desk”.', link: '/admin/businesses', createdAt: ago(2 * DAY), read: false },
       { id: 'n_8', userId: 'u_admin', kind: 'campaign', title: 'Campaign awaiting review', body: '“Proofreading flyer for Taiwo’s Proofing Desk”.', link: '/admin/campaigns', createdAt: ago(1 * DAY), read: false },
       { id: 'n_9', userId: 'u_morayo', kind: 'result', title: 'New result proof to confirm', body: 'Salawu submitted a lead on “Leads for the Fashion Corner grand sale”.', link: '/app/campaign/m_lead_1', createdAt: ago(5 * HOUR), read: false },
-      { id: 'n_10', userId: 'u_chuka', kind: 'system', title: 'Reward status updated', body: 'You’re one completed Campaign away from your monthly reward.', link: '/ambassador', createdAt: ago(2 * DAY), read: false },
+      { id: 'n_10', userId: 'u_chiamaka', kind: 'system', title: 'Reward status updated', body: 'You’re one completed Campaign away from your monthly reward.', link: '/ambassador', createdAt: ago(2 * DAY), read: false },
     ],
     ambassadors: [
-      { id: 'amb_1', userId: 'u_chuka', campusId: unilag.id, vendorsRecruited: 4, promotersRecruited: 18, approvedReferrals: 14, completedCampaigns: 9, retained30Days: 12, rewardStatus: 'qualified', rewardEarned: 24000, monthlyTarget: 10 },
+      { id: 'amb_1', userId: 'u_chiamaka', campusId: unilag.id, vendorsRecruited: 4, promotersRecruited: 18, approvedReferrals: 14, completedCampaigns: 9, retained30Days: 12, rewardStatus: 'qualified', rewardEarned: 24000, monthlyTarget: 10 },
       { id: 'amb_2', userId: 'u_bola', campusId: unilag.id, vendorsRecruited: 2, promotersRecruited: 11, approvedReferrals: 8, completedCampaigns: 4, retained30Days: 7, rewardStatus: 'pending', rewardEarned: 9000, monthlyTarget: 8 },
     ],
     ambassadorReferrals: [

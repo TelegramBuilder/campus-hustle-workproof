@@ -32,7 +32,7 @@ npm run build
 |---|---|
 | `salawu` | Contributor / promoter |
 | `morayo` | Vendor (Student Business Profile) |
-| `chuka` | Ambassador |
+| `chiamaka` | Ambassador |
 | `kunle` | Admin |
 
 ## Local demo vs. cloud sync

@@ -25,7 +25,7 @@ export function authEmailFor(username: string): string {
 export const isDemoEmail = (email: string) => /@demo\.campushustle\.app$/.test(email.toLowerCase());
 
 /** Demo usernames that have matching Supabase Auth accounts (created by schema.sql, password password123). */
-export const DEMO_USERNAMES = new Set(['salawu', 'morayo', 'tobi', 'chuka', 'admin', 'super']);
+export const DEMO_USERNAMES = new Set(['salawu', 'morayo', 'tobi', 'chiamaka', 'admin', 'super']);
 
 let _sb: SupabaseClient | null = null;
 export function supabase(): SupabaseClient | null {

@@ -14,7 +14,7 @@ export default function AmbassadorDashboard() {
       <div className="app-frame" style={{ padding: '30px 20px', textAlign: 'center' }}>
         <div style={{ fontSize: 44, marginBottom: 10 }}>🎙️</div>
         <h2>Ambassador area</h2>
-        <p className="subtle" style={{ margin: '8px 0 18px' }}>Log in with the ambassador demo account (chuka / password123).</p>
+        <p className="subtle" style={{ margin: '8px 0 18px' }}>Log in with the ambassador demo account (chiamaka / password123).</p>
         <button className="btn btn-primary" onClick={() => nav('/login')}>Go to login</button>
       </div>
     );

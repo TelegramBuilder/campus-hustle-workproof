@@ -408,7 +408,7 @@ const REPLIES: Record<string, string[]> = {
   u_damilola: ['Thanks for the update!', 'Got it 👍', 'The exec will love this.'],
   u_segun: ['Thanks — I’ll check with the team.', 'Noted!', 'Alright, keep me posted.'],
   u_kunbi: ['Thank you!', 'That works for us.', 'Noted.' ],
-  u_chuka: ['Awesome work!', 'Let me know if you need anything.', 'Nice one 👏'],
+  u_chiamaka: ['Awesome work!', 'Let me know if you need anything.', 'Nice one 👏'],
   u_aisha: ['Sounds good!', 'On it.', 'Thanks!'],
   u_admin: ['Noted.', 'I’ll review it shortly.', 'Thanks for flagging.'],
 };
