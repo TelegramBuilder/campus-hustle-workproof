@@ -9,19 +9,24 @@ export default function Splash() {
   return (
     <div className="splash">
       <div className="splash-logo">
-        <LogoMark size={92} />
-        <div className="wordmark" style={{ marginTop: 20, fontSize: 28 }}>
+        <div className="splash-mark">
+          <LogoMark size={96} />
+        </div>
+        <div className="wordmark" style={{ marginTop: 22, fontSize: 29 }}>
           <span style={{ color: '#fff' }}>Campus</span>
           <span style={{ color: '#7ee2bd' }}>Hustle</span>
         </div>
-        <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '0.3em', color: 'rgba(255,255,255,0.7)', marginTop: 6 }}>GROWTHPROOF</div>
-        <p className="tagline" style={{ marginTop: 14 }}>Build proof. Earn trust. Get hired.</p>
+        <div className="splash-gold-line" />
+        <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '0.32em', color: 'rgba(255,255,255,0.75)', marginTop: 14 }}>GROWTHPROOF</div>
+        <p className="tagline" style={{ marginTop: 12 }}>Build proof. Earn trust. Get hired.</p>
       </div>
       <div className="splash-cta">
-        <button className="btn btn-lg btn-block" style={{ background: '#fff', color: 'var(--navy)', fontWeight: 800 }} onClick={() => nav('/onboarding')}>Get started</button>
+        <button className="btn btn-lg btn-block" style={{ background: 'linear-gradient(135deg,#ffc233,#eaa800)', color: 'var(--navy)', fontWeight: 800, boxShadow: '0 12px 28px rgba(244,180,0,0.35)' }} onClick={() => nav('/onboarding')}>
+          Get started
+        </button>
         <button
           className="btn btn-lg btn-block"
-          style={{ border: '1.5px solid rgba(255,255,255,0.4)', color: '#fff' }}
+          style={{ border: '1.5px solid rgba(255,255,255,0.45)', color: '#fff', background: 'rgba(255,255,255,0.08)' }}
           onClick={() => nav('/login')}
         >
           Log in

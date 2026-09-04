@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useApp, currentUser, byId, publicName, levelInfo, userRating } from '../lib/store';
-import { Avatar, RatingStars, LevelBadge, VerifiedBadge, GrowthProofCard, EmptyState, toast, Modal, Field, Input, Textarea } from '../components/ui';
-import { IconBack, IconEdit, IconUsers, IconShield } from '../components/icons';
+import { Avatar, RatingStars, LevelBadge, GrowthProofCard, EmptyState, toast, Modal, Field, Input, Textarea } from '../components/ui';
+import { IconBack, IconEdit, IconUsers, IconShield, IconVerified } from '../components/icons';
 import { timeAgo } from '../lib/format';
 import { BUSINESS_CATEGORIES } from '../lib/domain';
 import type { User } from '../lib/types';
@@ -85,36 +85,39 @@ export default function Passport() {
   };
 
   const header = (
-    <div style={{ padding: '18px 16px 0' }}>
-      {/* top row */}
-      <div className="row-between" style={{ marginBottom: 14 }}>
-        {isMe ? <div /> : <button className="btn-icon btn-soft" onClick={() => nav(-1)}><IconBack size={18} /></button>}
-        {isMe && (
-          <div className="row" style={{ gap: 8 }}>
-            {!bizApproved && (
-              <button className="btn btn-sm btn-soft" onClick={() => setBizOpen(true)}>🏪 {biz ? (biz.status === 'pending' ? 'Business pending' : biz.status === 'rejected' ? 'Re-apply as vendor' : '') : 'Start a business'}</button>
-            )}
-            <button className="btn btn-sm btn-primary" onClick={() => nav('/app/profile/edit')}><IconEdit size={14} /> Edit</button>
-          </div>
-        )}
-      </div>
+    <div>
+      <div className="pp-hero">
+        <div className="row-between" style={{ marginBottom: 16 }}>
+          {isMe ? <div /> : <button className="btn-icon" style={{ background: 'rgba(255,255,255,0.16)', color: '#fff' }} onClick={() => nav(-1)}><IconBack size={18} /></button>}
+          {isMe && (
+            <div className="row" style={{ gap: 8 }}>
+              {!bizApproved && (
+                <button className="btn btn-sm pp-chip-btn" onClick={() => setBizOpen(true)}>🏪 {biz ? (biz.status === 'pending' ? 'Business pending' : biz.status === 'rejected' ? 'Re-apply as vendor' : '') : 'Start a business'}</button>
+              )}
+              <button className="btn btn-sm" style={{ background: '#fff', color: 'var(--green-dark)', fontWeight: 800 }} onClick={() => nav('/app/profile/edit')}><IconEdit size={14} /> Edit</button>
+            </div>
+          )}
+        </div>
 
-      <div className="row" style={{ gap: 14 }}>
-        <Avatar user={profile} size="xl" showVerified />
-        <div className="grow" style={{ minWidth: 0 }}>
-          <h1 style={{ fontSize: 20, lineHeight: 1.15 }}>{publicName(profile)}</h1>
-          <div className="subtle" style={{ fontSize: 12.5 }}>
-            @{profile.username} · UNILAG{profile.faculty ? ` · ${profile.faculty}` : ''}{profile.showDepartment && profile.department ? ` · ${profile.department}` : ''}
-          </div>
-          <div className="row wrap" style={{ gap: 8, marginTop: 6 }}>
-            {profile.verificationStatus === 'verified' && <VerifiedBadge />}
-            {profile.verificationStatus !== 'verified' && profile.verificationStatus !== 'suspended' && isMe && (
-              <button className="tag tag-amber" style={{ cursor: 'pointer', border: 'none' }} onClick={() => nav('/app/verify')} title="Review or re-submit verification">Verification {profile.verificationStatus} · tap to review</button>
-            )}
-            {profile.verificationStatus === 'suspended' && <span className="tag tag-red">Suspended</span>}
+        <div className="row" style={{ gap: 15 }}>
+          <span className="pp-avatar"><Avatar user={profile} size="xl" showVerified /></span>
+          <div className="grow" style={{ minWidth: 0 }}>
+            <h1 style={{ fontSize: 22, lineHeight: 1.15, color: '#fff' }}>{publicName(profile)}</h1>
+            <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.78)', fontWeight: 600, marginTop: 2 }}>
+              @{profile.username} · UNILAG{profile.faculty ? ` · ${profile.faculty}` : ''}{profile.showDepartment && profile.department ? ` · ${profile.department}` : ''}
+            </div>
+            <div className="row wrap" style={{ gap: 8, marginTop: 9 }}>
+              {profile.verificationStatus === 'verified' && <span className="pp-verified"><IconVerified size={13} /> Verified UNILAG student</span>}
+              {profile.verificationStatus !== 'verified' && profile.verificationStatus !== 'suspended' && isMe && (
+                <button className="tag tag-amber" style={{ cursor: 'pointer', border: 'none' }} onClick={() => nav('/app/verify')} title="Review or re-submit verification">Verification {profile.verificationStatus} · tap to review</button>
+              )}
+              {profile.verificationStatus === 'suspended' && <span className="tag tag-red">Suspended</span>}
+            </div>
           </div>
         </div>
       </div>
+
+      <div style={{ padding: '0 16px' }}>
 
       {/* student business strip */}
       {biz && (
@@ -143,11 +146,11 @@ export default function Passport() {
           <p className="subtle" style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>GrowthProof level</p>
           <LevelBadge levelKey={lvl.key} name={lvl.name} />
         </div>
-        <div className="row wrap" style={{ gap: 22, marginTop: 12 }}>
-          <Metric n={String(lvl.entries)} l="Accepted Campaigns" />
+        <div className="pp-stats">
+          <Metric n={String(lvl.entries)} l="Accepted" />
           <Metric n={lvl.avgRating > 0 ? `${lvl.avgRating.toFixed(1)}★` : '—'} l="Rating" />
-          <Metric n={onTimeRate === null ? '—' : `${onTimeRate}%`} l={onTimeRate === null ? 'No Campaigns yet' : 'On-time'} />
-          <Metric n={String(profile.stats.totalApplications)} l="Applications" />
+          <Metric n={onTimeRate === null ? '—' : `${onTimeRate}%`} l={onTimeRate === null ? 'No jobs' : 'On-time'} />
+          <Metric n={String(profile.stats.totalApplications)} l="Applied" />
         </div>
         {lvl.next && !isMe && lvl.entries > 0 && (
           <div className="subtle" style={{ fontSize: 11.5, marginTop: 8 }}>Next: {lvl.next.text}</div>
@@ -159,6 +162,7 @@ export default function Passport() {
         {TABS.map((t) => (
           <button key={t} className={`tab ${tab === t ? 'active' : ''}`} onClick={() => setTab(t)} style={{ whiteSpace: 'nowrap' }}>{t}</button>
         ))}
+      </div>
       </div>
     </div>
   );
@@ -417,9 +421,9 @@ export default function Passport() {
 }
 
 const Metric = ({ n, l }: { n: string; l: string }) => (
-  <div className="col" style={{ gap: 0 }}>
-    <span className="strong" style={{ fontSize: 18, color: 'var(--navy)' }}>{n}</span>
-    <span className="subtle" style={{ fontSize: 10.5 }}>{l}</span>
+  <div className="pp-stat">
+    <b>{n}</b>
+    <span>{l}</span>
   </div>
 );
 

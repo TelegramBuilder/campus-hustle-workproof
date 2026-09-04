@@ -144,10 +144,15 @@ const LEVEL_STYLE: Record<string, { emoji: string; color: string; bg: string }> 
   squad_leader: { emoji: '👑', color: '#7c3aed', bg: '#f1eafd' },
 };
 
-export function LevelBadge({ levelKey, name }: { levelKey: string; name: string }) {
+export function LevelBadge({ levelKey, name, light = false }: { levelKey: string; name: string; light?: boolean }) {
   const s = LEVEL_STYLE[levelKey] ?? LEVEL_STYLE.explorer;
+  if (light) {
+    return (
+      <span className="hp-level"><span>{s.emoji}</span> {name}</span>
+    );
+  }
   return (
-    <span className="row" style={{ gap: 6, background: s.bg, color: s.color, borderRadius: 999, padding: '6px 12px', fontWeight: 800, fontSize: 13 }}>
+    <span className="row" style={{ gap: 6, background: s.bg, color: s.color, borderRadius: 999, padding: '6px 13px', fontWeight: 800, fontSize: 13, boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.04)' }}>
       <span>{s.emoji}</span> {name}
     </span>
   );
@@ -279,36 +284,37 @@ export function CampaignCard({ campaign, owner, compact = false, showTrack = tru
   const days = Math.ceil((campaign.deadline - Date.now()) / 86400000);
   const people = kind === 'result' ? 'promoter' : 'applicant';
   return (
-    <div className="card card-tap card-pad" style={{ marginBottom: 10 }} onClick={() => nav(`/app/campaign/${campaign.id}`)}>
-      <div className="row-between" style={{ marginBottom: 8 }}>
-        {showTrack ? <span className="tag tag-green">{type?.emoji} {type?.name}</span> : <span />}
-        <StatusChip status={campaign.status} />
-      </div>
-      <div className="strong" style={{ color: 'var(--navy)', fontSize: compact ? 14.5 : 16, lineHeight: 1.3 }}>{campaign.title}</div>
-      {owner && (
-        <div className="row" style={{ gap: 6, marginTop: 6 }}>
-          <Avatar user={owner} size="xs" showVerified />
-          <span style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--slate)' }}>{publicName(owner)} · verified student business</span>
+    <div className="card card-tap card-pad cc-card" style={{ marginBottom: 12 }} onClick={() => nav(`/app/campaign/${campaign.id}`)}>
+      <div className="row" style={{ gap: 13, alignItems: 'flex-start' }}>
+        <div className="cc-icon" style={{ background: gradientFor(campaign.campaignType) }} aria-hidden>{type?.emoji}</div>
+        <div className="grow" style={{ minWidth: 0 }}>
+          <div className="row-between" style={{ marginBottom: 5, gap: 8 }}>
+            <span className="cc-type-name">{showTrack ? type?.name : ''}</span>
+            <StatusChip status={campaign.status} />
+          </div>
+          <div className="cc-title">{campaign.title}</div>
+          {owner && (
+            <div className="row" style={{ gap: 6, marginTop: 7 }}>
+              <Avatar user={owner} size="xs" showVerified />
+              <span style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--slate)' }}>{publicName(owner)} · verified student business</span>
+            </div>
+          )}
+          {!compact && <p className="subtle cc-brief">{campaign.brief}</p>}
+          {campaign.skills.slice(0, 4).length > 0 && (
+            <div className="row wrap" style={{ gap: 6, marginTop: 10 }}>
+              {campaign.skills.slice(0, 4).map((s) => <span key={s} className="skill-chip">{s}</span>)}
+            </div>
+          )}
+          <div className="divider-soft" style={{ margin: '11px 0 10px' }} />
+          <div className="row wrap" style={{ gap: 6 }}>
+            <span className="cc-meta-chip cc-money">💰 {campaign.rewardType === 'per_result' ? `₦${campaign.rewardAmount.toLocaleString()}/result` : `₦${campaign.rewardAmount.toLocaleString()} flat`}</span>
+            <span className="cc-meta-chip">👥 {campaign.applicantsCount} {people}{campaign.applicantsCount !== 1 ? 's' : ''}</span>
+            <span className="cc-meta-chip">⏳ {days > 0 ? `${days}d left` : days === 0 ? 'Today' : 'Closed'}</span>
+            {kind === 'result' && campaign.targetResults ? <span className="cc-meta-chip">🎯 {campaign.confirmedResults}/{campaign.targetResults}</span> : null}
+            {campaign.squadEligible !== 'individual' && <span className="tag tag-navy">Squad OK</span>}
+          </div>
         </div>
-      )}
-      <p className="subtle" style={{ fontSize: 13, marginTop: 5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-        {campaign.brief}
-      </p>
-      <div className="row wrap" style={{ gap: 5, marginTop: 10 }}>
-        {campaign.skills.slice(0, 4).map((s) => <span key={s} className="skill-chip">{s}</span>)}
       </div>
-      <div className="divider" style={{ margin: '10px 0 8px' }} />
-      <div className="row wrap" style={{ gap: 8, fontSize: 12, color: 'var(--slate)' }}>
-        <span>⏳ {days > 0 ? `${days}d left` : days === 0 ? 'Today' : 'Closed'}</span>
-        <span>💰 {campaign.rewardType === 'per_result' ? `₦${campaign.rewardAmount.toLocaleString()}/result` : `₦${campaign.rewardAmount.toLocaleString()} flat`}</span>
-        <span>💳 {campaign.payment === 'paid_outside' ? 'Paid outside' : campaign.payment === 'volunteer' ? 'Volunteer' : 'To discuss'}</span>
-        <span>👥 {campaign.applicantsCount} {people}{campaign.applicantsCount !== 1 ? 's' : ''}</span>
-        {kind === 'result' && campaign.targetResults ? <span>🎯 {campaign.confirmedResults}/{campaign.targetResults} results</span> : null}
-        {campaign.squadEligible !== 'individual' && <span className="tag tag-navy">Squad OK</span>}
-      </div>
-      <button className="btn btn-ghost btn-sm btn-block" style={{ marginTop: 10 }} onClick={(e) => { e.stopPropagation(); nav(`/app/campaign/${campaign.id}`); }}>
-        View Campaign
-      </button>
     </div>
   );
 }

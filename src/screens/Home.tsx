@@ -1,11 +1,20 @@
 import { useNavigate } from 'react-router-dom';
-import { useApp, currentUser, publicName, byId, levelInfo } from '../lib/store';
+import { useApp, currentUser, publicName, byId, levelInfo, unreadNotifications } from '../lib/store';
 import { CampaignCard, SectionTitle, Avatar, LevelBadge } from '../components/ui';
 import { IconBell } from '../components/icons';
 import { greeting, timeAgo } from '../lib/format';
-import { unreadNotifications } from '../lib/store';
 import { CAMPAIGN_TYPES, CAMPAIGN_TYPE_MAP, KIND_OF } from '../lib/domain';
 import type { CampaignType } from '../lib/types';
+
+const TYPE_GRADIENT: Record<string, string> = {
+  sale: 'linear-gradient(135deg,#0b8c66,#065f46)',
+  lead: 'linear-gradient(135deg,#0284c7,#075985)',
+  ticket_sale: 'linear-gradient(135deg,#7c3aed,#5b21b6)',
+  content_task: 'linear-gradient(135deg,#db2777,#9d174d)',
+  promotion_task: 'linear-gradient(135deg,#ea580c,#c2410c)',
+  media_task: 'linear-gradient(135deg,#0d9488,#115e59)',
+  research_task: 'linear-gradient(135deg,#1d4ed8,#3730a3)',
+};
 
 export default function Home() {
   const { state } = useApp();
@@ -29,59 +38,54 @@ export default function Home() {
   const typeCounts = new Map<string, number>();
   open.forEach((m) => typeCounts.set(m.campaignType, (typeCounts.get(m.campaignType) ?? 0) + 1));
 
+  const firstName = publicName(me).split(' ')[0];
+
   return (
     <div>
-      <div className="top-bar">
+      {/* Hero */}
+      <div className="home-hero">
         <div className="row-between">
           <div>
-            <div className="strong" style={{ fontSize: 21, color: 'var(--navy)' }}>{greeting()}, {publicName(me).split(' ')[0]} 👋</div>
-            <div className="subtle" style={{ fontSize: 12 }}>UNILAG · Akoka</div>
+            <div className="hero-greeting">{greeting()}, {firstName} 👋</div>
+            <div className="hero-sub">UNILAG · Akoka</div>
           </div>
-          <button className="btn-icon btn-soft" style={{ position: 'relative', borderRadius: '50%' }} onClick={() => nav('/app/notifications')} aria-label="Notifications">
+          <button className="hero-bell" onClick={() => nav('/app/notifications')} aria-label="Notifications">
             <IconBell size={19} />
-            {unreadN > 0 && <span style={{ position: 'absolute', top: -2, right: -2, background: 'var(--danger)', color: '#fff', fontSize: 9.5, minWidth: 17, height: 17, borderRadius: 999, display: 'grid', placeItems: 'center', fontWeight: 800, padding: '0 3px' }}>{unreadN > 9 ? '9+' : unreadN}</span>}
+            {unreadN > 0 && (
+              <span style={{ position: 'absolute', top: -4, right: -4, background: 'var(--danger)', color: '#fff', fontSize: 9.5, minWidth: 18, height: 18, borderRadius: 999, display: 'grid', placeItems: 'center', fontWeight: 800, padding: '0 4px', boxShadow: '0 2px 6px rgba(220,38,38,.5)' }}>
+                {unreadN > 9 ? '9+' : unreadN}
+              </span>
+            )}
           </button>
+        </div>
+
+        {/* Passport progress */}
+        <div className="hero-progress">
+          <div className="hp-top">
+            <div>
+              <div className="hp-label">GrowthProof Passport</div>
+              <div style={{ marginTop: 8 }}>
+                <LevelBadge levelKey={level.key} name={level.name} light />
+              </div>
+            </div>
+            <button className="hp-view" onClick={() => nav('/app/passport')}>View Passport</button>
+          </div>
+          <div className="hp-stats">
+            <div className="hp-stat"><b>{level.entries}</b><span>Entries</span></div>
+            <div className="hp-stat"><b>{level.avgRating > 0 ? level.avgRating.toFixed(1) + '★' : '—'}</b><span>Rating</span></div>
+            <div className="hp-stat"><b>{level.onTimePct === null ? '—' : `${level.onTimePct}%`}</b><span>{level.onTimePct === null ? 'No jobs yet' : 'On-time'}</span></div>
+            <div className="hp-stat"><b>{level.squadCampaigns}</b><span>Squads</span></div>
+          </div>
+          {level.next && (
+            <>
+              <div className="hp-bar"><div style={{ width: `${level.next.progress}%` }} /></div>
+              <div className="hp-next">🎯 {level.next.text}</div>
+            </>
+          )}
         </div>
       </div>
 
-      <div style={{ padding: '2px 16px' }}>
-        {/* Passport progress card */}
-        <div className="card card-pad" style={{ marginBottom: 18, border: '1.5px solid var(--green-mist)', background: 'linear-gradient(140deg,#ffffff, #f2faf7)' }}>
-          <div className="row-between">
-            <div>
-              <p className="subtle" style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>GrowthProof Passport</p>
-              <div className="row" style={{ gap: 8, marginTop: 6 }}>
-                <LevelBadge levelKey={level.key} name={level.name} />
-              </div>
-            </div>
-            <button className="btn btn-sm btn-ghost" onClick={() => nav('/app/passport')}>View Passport</button>
-          </div>
-          <div className="row wrap" style={{ gap: 16, marginTop: 12 }}>
-            <div className="col" style={{ gap: 0 }}>
-              <span className="strong" style={{ fontSize: 18, color: 'var(--navy)' }}>{level.entries}</span>
-              <span className="subtle" style={{ fontSize: 11 }}>GrowthProof entries</span>
-            </div>
-            <div className="col" style={{ gap: 0 }}>
-              <span className="strong" style={{ fontSize: 18, color: 'var(--navy)' }}>{level.avgRating > 0 ? level.avgRating.toFixed(1) + '★' : '—'}</span>
-              <span className="subtle" style={{ fontSize: 11 }}>Rating</span>
-            </div>
-            <div className="col" style={{ gap: 0 }}>
-              <span className="strong" style={{ fontSize: 18, color: 'var(--navy)' }}>{level.onTimePct === null ? '—' : `${level.onTimePct}%`}</span>
-              <span className="subtle" style={{ fontSize: 11 }}>{level.onTimePct === null ? 'No Campaigns yet' : 'On-time'}</span>
-            </div>
-            <div className="col" style={{ gap: 0 }}>
-              <span className="strong" style={{ fontSize: 18, color: 'var(--navy)' }}>{level.squadCampaigns}</span>
-              <span className="subtle" style={{ fontSize: 11 }}>Squad work</span>
-            </div>
-          </div>
-          {level.next && (
-            <div className="earn-line" style={{ marginTop: 12 }}>
-              <span>🎯</span>
-              <span>{level.next.text}</span>
-            </div>
-          )}
-        </div>
-
+      <div style={{ padding: '0 16px' }}>
         {/* Recommended Campaigns */}
         {featured.length > 0 && (
           <div className="section">
@@ -93,14 +97,14 @@ export default function Home() {
         {/* Campaign types */}
         <div className="section">
           <SectionTitle title="Campaign types" seeAll="Browse all" onClick={() => nav('/app/campaigns')} />
-          <div className="row wrap" style={{ gap: 8 }}>
+          <div className="row wrap" style={{ gap: 10 }}>
             {CAMPAIGN_TYPES.slice(1).map((t) => {
               const count = typeCounts.get(t.id as CampaignType) ?? 0;
               return (
-                <div key={t.id} className="cat-tile" style={{ flex: '1 1 30%', minWidth: 100 }} onClick={() => nav(`/app/campaigns?type=${t.id}`)}>
-                  <div className="cat-emoji">{t.emoji}</div>
+                <div key={t.id} className="cat-tile" style={{ flex: '1 1 29%', minWidth: 96 }} onClick={() => nav(`/app/campaigns?type=${t.id}`)}>
+                  <div className="cat-emoji" style={{ background: TYPE_GRADIENT[t.id] ?? 'var(--mist-soft)' }}>{t.emoji}</div>
                   <div className="cat-name">{t.name}</div>
-                  <div className="subtle" style={{ fontSize: 10.5, marginTop: 3 }}>{count} live</div>
+                  <div className="cat-count"><b>{count}</b> live</div>
                 </div>
               );
             })}
@@ -110,23 +114,29 @@ export default function Home() {
         {/* Current opportunities */}
         <div className="section">
           <SectionTitle title="Current opportunities" seeAll="All Campaigns" onClick={() => nav('/app/campaigns')} />
-          <div className="col" style={{ gap: 10 }}>
+          <div className="col" style={{ gap: 12 }}>
             {open.slice(0, 3).map((m) => {
               const t = CAMPAIGN_TYPE_MAP[m.campaignType];
               const biz = byId(state.businesses, m.businessProfileId ?? '');
+              const days = Math.ceil((m.deadline - Date.now()) / 86400000);
               return (
                 <div key={m.id} className="card card-pad card-tap" onClick={() => nav(`/app/campaign/${m.id}`)}>
                   <div className="row-between" style={{ gap: 8 }}>
                     <span className="tag tag-green">{t?.emoji} {t?.name}</span>
-                    <span className="subtle" style={{ fontSize: 11.5 }}>⏳ {Math.ceil((m.deadline - Date.now()) / 86400000)}d left</span>
+                    <span className={`tag ${days <= 2 ? 'tag-red' : 'tag-slate'}`}>⏳ {days}d left</span>
                   </div>
-                  <div className="strong" style={{ marginTop: 8, fontSize: 15, color: 'var(--navy)' }}>{m.title}</div>
-                  {biz && <div className="subtle" style={{ fontSize: 11.5, marginTop: 2 }}>🏪 {biz.businessName}</div>}
-                  <div className="row wrap" style={{ gap: 8, marginTop: 8, fontSize: 12, color: 'var(--slate)' }}>
-                    <span>💰 {m.rewardType === 'per_result' ? `₦${m.rewardAmount.toLocaleString()} per result` : `₦${m.rewardAmount.toLocaleString()} fixed`}</span>
-                    <span>👥 {m.applicantsCount} {KIND_OF(m.campaignType) === 'result' ? 'promoters' : 'applicants'}</span>
-                    {m.skills.slice(0, 3).map((s) => <span key={s} className="skill-chip">{s}</span>)}
+                  <div className="strong" style={{ marginTop: 9, fontSize: 15.5, color: 'var(--navy)', letterSpacing: '-0.01em' }}>{m.title}</div>
+                  {biz && <div className="subtle" style={{ fontSize: 12, marginTop: 3 }}>🏪 {biz.businessName}</div>}
+                  <div className="divider-soft" />
+                  <div className="row wrap" style={{ gap: 8, fontSize: 12, color: 'var(--slate)' }}>
+                    <span className="row" style={{ gap: 4, fontWeight: 700, color: 'var(--green-dark)' }}>💰 {m.rewardType === 'per_result' ? `₦${m.rewardAmount.toLocaleString()} per result` : `₦${m.rewardAmount.toLocaleString()} fixed`}</span>
+                    <span className="row" style={{ gap: 4, fontWeight: 600 }}>👥 {m.applicantsCount} {KIND_OF(m.campaignType) === 'result' ? 'promoters' : 'applicants'}</span>
                   </div>
+                  {m.skills.slice(0, 3).length > 0 && (
+                    <div className="row wrap" style={{ gap: 6, marginTop: 9 }}>
+                      {m.skills.slice(0, 3).map((s) => <span key={s} className="skill-chip">{s}</span>)}
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -134,13 +144,13 @@ export default function Home() {
         </div>
 
         {/* Create CTA */}
-        <div className="banner banner-green" style={{ marginBottom: 18 }}>
-          <span style={{ fontSize: 26 }}>🏪</span>
+        <div className="banner banner-green" style={{ marginBottom: 22 }}>
+          <span style={{ fontSize: 28 }}>🏪</span>
           <div className="grow">
             <h3>{isVendor ? 'Have a product or service to sell?' : 'Run a student business?'}</h3>
             <p>{isVendor ? 'Post a Campaign: promoters bring you sales, leads or tickets — or creators do the work. You confirm every result.' : 'Verified students can start a student business, then post Campaigns that pay promoters and creators.'}</p>
           </div>
-          <button className="btn btn-sm" style={{ background: '#fff', color: 'var(--green-dark)', fontWeight: 800 }} onClick={() => nav(isVendor ? '/app/create' : '/app/passport?vendor=1')}>
+          <button className="btn btn-sm" style={{ background: '#fff', color: 'var(--green-dark)', fontWeight: 800, boxShadow: 'none', whiteSpace: 'nowrap' }} onClick={() => nav(isVendor ? '/app/create' : '/app/passport?vendor=1')}>
             {isVendor ? 'Create Campaign' : 'Start a business'}
           </button>
         </div>
@@ -148,8 +158,8 @@ export default function Home() {
         {/* Small activity */}
         <div className="section">
           <SectionTitle title="Campus activity" />
-          <div className="card">
-            <div className="list-item" style={{ cursor: 'default' }}>
+          <div className="card card-pad" style={{ padding: '6px 0' }}>
+            <div className="list-item" style={{ cursor: 'default', borderRadius: 0 }}>
               <Avatar user={byId(state.users, 'u_aisha')} size="sm" showVerified />
               <div className="grow">
                 <span style={{ fontSize: 13 }}><strong>Aisha</strong> earned GrowthProof for <strong>Product photography</strong>.</span>
