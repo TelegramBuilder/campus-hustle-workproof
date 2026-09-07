@@ -1,7 +1,10 @@
 -- ============================================================
--- CampusHustle GrowthProof — Supabase setup (run once in the SQL editor)
--- Creates the shared campus "world", membership, RLS, and the
--- six demo auth accounts (password: password123).
+-- CampusHustle — Supabase setup (run once in the SQL editor)
+-- Creates the shared campus "world", membership, RLS, and
+-- enables realtime for the world table.
+-- Demo auth accounts are created separately with the Admin API
+-- (scripts/create-demo-users.mjs) — no raw auth.users inserts.
+-- Safe to re-run (idempotent).
 -- ============================================================
 
 create extension if not exists pgcrypto;
@@ -58,30 +61,12 @@ drop policy if exists "member joins own membership" on public.world_members;
 create policy "member joins own membership" on public.world_members
   for insert with check (auth_uid = auth.uid());
 
--- ---------- demo auth accounts (password: password123) ----------
--- Add more rows to let other seeded profiles sign in, or create real
--- accounts through the app's sign-up (turn OFF email confirmation under
--- Authentication → Sign In / Providers → Email → Confirm email).
-insert into auth.users (
-  instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
-  raw_app_meta_data, raw_user_meta_data, created_at, updated_at, confirmation_token, recovery_token
-) values
-('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000101', 'authenticated', 'authenticated',
- 'salawu@demo.campushustle.app', crypt('password123', gen_salt('bf')), now(),
- '{"provider":"email","providers":["email"]}', '{}', now(), now(), '', ''),
-('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000102', 'authenticated', 'authenticated',
- 'morayo@demo.campushustle.app', crypt('password123', gen_salt('bf')), now(),
- '{"provider":"email","providers":["email"]}', '{}', now(), now(), '', ''),
-('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000103', 'authenticated', 'authenticated',
- 'tobi@demo.campushustle.app', crypt('password123', gen_salt('bf')), now(),
- '{"provider":"email","providers":["email"]}', '{}', now(), now(), '', ''),
-('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000104', 'authenticated', 'authenticated',
- 'chiamaka@demo.campushustle.app', crypt('password123', gen_salt('bf')), now(),
- '{"provider":"email","providers":["email"]}', '{}', now(), now(), '', ''),
-('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000105', 'authenticated', 'authenticated',
- 'admin@demo.campushustle.app', crypt('password123', gen_salt('bf')), now(),
- '{"provider":"email","providers":["email"]}', '{}', now(), now(), '', ''),
-('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000106', 'authenticated', 'authenticated',
- 'super@demo.campushustle.app', crypt('password123', gen_salt('bf')), now(),
- '{"provider":"email","providers":["email"]}', '{}', now(), now(), '', '')
-on conflict (email) do nothing;
+-- ---------- realtime (cross-device live sync) ----------
+-- worlds must be in the realtime publication for the app's
+-- "postgres_changes" subscription to receive UPDATEs.
+do $$
+begin
+  alter publication supabase_realtime add table public.worlds;
+exception
+  when duplicate_object then null;
+end $$;

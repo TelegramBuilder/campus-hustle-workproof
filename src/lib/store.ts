@@ -149,49 +149,54 @@ async function enterWorld(authUser: any): Promise<void> {
   lastEnteredUid = authUser?.id ?? '';
   lastEnterAt = now;
 
-  const email: string | undefined = authUser?.email;
-  let localUid: string | undefined = authUser?.user_metadata?.local_uid;
-  if (!localUid && email) {
-    const em = String(email).toLowerCase();
-    const match = state.users.find((u) => u.email.toLowerCase() === em);
-    if (match) localUid = match.id;
-    else {
-      const prefix = em.split('@')[0];
-      const un = state.users.find((u) => u.username.toLowerCase() === prefix);
-      if (un) localUid = un.id;
+  try {
+    const email: string | undefined = authUser?.email;
+    let localUid: string | undefined = authUser?.user_metadata?.local_uid;
+    if (!localUid && email) {
+      const em = String(email).toLowerCase();
+      const match = state.users.find((u) => u.email.toLowerCase() === em);
+      if (match) localUid = match.id;
+      else {
+        const prefix = em.split('@')[0];
+        const un = state.users.find((u) => u.username.toLowerCase() === prefix);
+        if (un) localUid = un.id;
+      }
     }
-  }
 
-  // attach membership to the shared UNILAG demo world
-  const { data: mem } = await sb.from('world_members').select('local_uid, world_id').eq('auth_uid', authUser.id).maybeSingle();
-  const member = mem as { local_uid?: string; world_id?: string } | null;
-  if (!member) {
-    const { data: w } = await sb.from('worlds').select('id').eq('id', WORLD_ID).maybeSingle();
-    if (!w) {
-      // first device ever: create the shared world seeded with current local state
-      await sb.from('worlds').insert({ id: WORLD_ID, code: WORLD_CODE, state: JSON.parse(JSON.stringify(state)) });
-    }
+    // Upsert membership FIRST: the RLS read policies below only expose
+    // the world row to its members, so a brand-new device must be a
+    // member before the world becomes visible/selectable.
     await (sb.from('world_members') as any).upsert(
       { auth_uid: authUser.id, world_id: WORLD_ID, local_uid: localUid ?? '' },
       { onConflict: 'auth_uid' }
     );
     worldId = WORLD_ID;
-  } else {
-    worldId = member.world_id ?? WORLD_ID;
+
+    let { data: row } = await sb.from('worlds').select('state').eq('id', worldId).maybeSingle();
+    if (!row) {
+      // World row missing (schema not seeded yet) — create it. The insert
+      // policy only permits the canonical demo id/code.
+      await sb.from('worlds').insert({ id: WORLD_ID, code: WORLD_CODE, state: JSON.parse(JSON.stringify(state)) });
+      row = (await sb.from('worlds').select('state').eq('id', worldId).maybeSingle()).data as any;
+    }
+    const remoteState = (row as any)?.state as AppState | undefined;
+    const seeded = !!remoteState && Array.isArray(remoteState.users) && remoteState.users.length > 0;
+    if (seeded && remoteState) applyRemote(remoteState);
+    else { dirty = false; lastCanon = ''; void pushNow(); } // adopt local state as world truth
+
+    channel = sb
+      .channel('world:' + worldId)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'worlds', filter: `id=eq.${worldId}` }, (payload: any) => {
+        if (payload?.new?.state) applyRemote(payload.new.state as AppState);
+      })
+      .subscribe();
+  } catch (err) {
+    // DB not reachable/tables missing — never leave the session half-broken:
+    // stay on the local demo data and surface the fallback banner.
+    console.warn('[cloud] world sync failed — remaining in demo mode:', err);
+    worldId = null;
+    fallbackActive = true;
   }
-
-  const { data: row } = await sb.from('worlds').select('state').eq('id', worldId).maybeSingle();
-  const remoteState = (row as any)?.state as AppState | undefined;
-  const seeded = !!remoteState && Array.isArray(remoteState.users) && remoteState.users.length > 0;
-  if (seeded && remoteState) applyRemote(remoteState);
-  else { dirty = false; lastCanon = ''; void pushNow(); } // adopt local state as world truth
-
-  channel = sb
-    .channel('world:' + worldId)
-    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'worlds', filter: `id=eq.${worldId}` }, (payload: any) => {
-      if (payload?.new?.state) applyRemote(payload.new.state as AppState);
-    })
-    .subscribe();
 }
 
 /** Boot the cloud layer once (from App). No-op in local demo mode. */
